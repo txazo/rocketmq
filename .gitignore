@@ -3,6 +3,7 @@
 .project
 .settings/
 target/
+rocketmq/lib/
 devenv
 *.log*
 *.iml
@@ -11,3 +12,4 @@ devenv
 !NOTICE-BIN
 !LICENSE-BIN
 .DS_Store
+nohup.out
