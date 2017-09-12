@@ -4,10 +4,8 @@ import org.apache.rocketmq.namesrv.NamesrvStartup;
 
 public class RocketMQNamesrvStartupTest {
 
-    /**
-     * ROCKETMQ_HOME=/Users/txazo/TxazoProject/rocketmq/rocketmq
-     */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        RocketMQEnvInit.init();
         NamesrvStartup.main(args);
     }
 

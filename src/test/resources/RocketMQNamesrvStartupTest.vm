@@ -18,4 +18,3 @@
 -XX:+PrintGCDetails
 -XX:-OmitStackTraceInFastThrow
 -XX:-UseLargePages
--Djava.ext.dirs=/Users/txazo/TxazoProject/incubator-rocketmq/distribution/target/apache-rocketmq/lib
