@@ -2,7 +2,7 @@ package org.apache.rocketmq.test;
 
 import org.apache.rocketmq.common.MixAll;
 
-public class RocketMQEnvInit {
+public class RocketMQInit {
 
     public static void init() throws Exception {
         String rocketHome = getRocketMQHome();
@@ -13,7 +13,7 @@ public class RocketMQEnvInit {
     }
 
     private static String getRocketMQHome() {
-        String path = RocketMQEnvInit.class.getResource("/").getPath();
+        String path = RocketMQInit.class.getResource("/").getPath();
         int index = path.indexOf("/target");
         if (index > -1) {
             return path.substring(0, index) + "/rocketmq";

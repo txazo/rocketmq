@@ -5,7 +5,7 @@ import org.apache.rocketmq.namesrv.NamesrvStartup;
 public class RocketMQNamesrvStartupTest {
 
     public static void main(String[] args) throws Exception {
-        RocketMQEnvInit.init();
+        RocketMQInit.init();
         NamesrvStartup.main(args);
     }
 
