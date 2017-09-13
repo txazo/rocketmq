@@ -9,13 +9,14 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
 public class AsyncProducer {
 
     public static void main(String[] args) throws Exception {
-        DefaultMQProducer producer = new DefaultMQProducer("ExampleProducerGroup");
+        DefaultMQProducer producer = new DefaultMQProducer("group-1");
+        producer.setNamesrvAddr("127.0.0.1:9876");
         try {
             producer.start();
             producer.setRetryTimesWhenSendAsyncFailed(0);
             for (int i = 0; i < 100; i++) {
                 final int index = i;
-                Message msg = new Message("TopicTest", "TagA", "OrderID188", "Hello world".getBytes(RemotingHelper.DEFAULT_CHARSET));
+                Message msg = new Message("topic-2", "tag-1", "key-" + i, ("message-" + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
                 producer.send(msg, new SendCallback() {
 
                     @Override
@@ -26,7 +27,6 @@ public class AsyncProducer {
                     @Override
                     public void onException(Throwable t) {
                         System.out.printf("%-10d Exception %s %n", index, t);
-                        t.printStackTrace();
                     }
 
                 });
