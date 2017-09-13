@@ -1,9 +1,7 @@
 package org.apache.rocketmq.test.common;
 
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
-import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import org.apache.rocketmq.client.consumer.listener.*;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
@@ -13,7 +11,7 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
 
 import java.util.List;
 
-public class RocketMQProducerConsumerTest {
+public class SyncMessage {
 
     public static void main(String[] args) throws Exception {
         RocketMQProducerConsumer producerConsumer = new RocketMQProducerConsumer();
@@ -38,14 +36,14 @@ public class RocketMQProducerConsumerTest {
                     public void execute(DefaultMQPushConsumer consumer) throws Exception {
                         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
                         consumer.subscribe("topic-1", "*");
-                        consumer.registerMessageListener(new MessageListenerConcurrently() {
+                        consumer.registerMessageListener(new MessageListenerOrderly() {
 
                             @Override
-                            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+                            public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
                                 for (MessageExt message : msgs) {
                                     System.out.printf(Thread.currentThread().getName() + " Receive New Messages: " + message + "%n");
                                 }
-                                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+                                return ConsumeOrderlyStatus.SUCCESS;
                             }
 
                         });

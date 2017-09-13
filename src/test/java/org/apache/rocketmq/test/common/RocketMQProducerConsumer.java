@@ -65,11 +65,11 @@ public class RocketMQProducerConsumer {
 
         public void init() throws Exception {
             admin = factory.newInstance(groupName);
-            callMethod(admin, "setNamesrvAddr", new Class<?>[]{String.class}, new Object[]{namesrvAddr});
+            callMethod(admin, "setNamesrvAddr", new Class<?>[]{String.class}, namesrvAddr);
         }
 
         public void start() throws Exception {
-            callMethod(admin, "start", new Class<?>[]{}, new Object[]{});
+            callMethod(admin, "start", new Class<?>[]{});
         }
 
         public void execute() throws Exception {
@@ -77,7 +77,7 @@ public class RocketMQProducerConsumer {
         }
 
         public void shutdown() throws Exception {
-            callMethod(admin, "shutdown", new Class<?>[]{}, new Object[]{});
+            callMethod(admin, "shutdown", new Class<?>[]{});
         }
 
         @Override
@@ -138,13 +138,13 @@ public class RocketMQProducerConsumer {
         }
 
         public T newInstance(String groupName) throws Exception {
-            Constructor c = clazz.getDeclaredConstructor(new Class<?>[]{String.class});
+            Constructor c = clazz.getDeclaredConstructor(String.class);
             return (T) c.newInstance(groupName);
         }
 
     }
 
-    public static interface RocketMQExecutor<T extends MQAdmin> {
+    public interface RocketMQExecutor<T extends MQAdmin> {
 
         void execute(T t) throws Exception;
 
