@@ -1,5 +1,6 @@
 package org.apache.rocketmq.test.message;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -16,6 +17,9 @@ import org.apache.rocketmq.test.common.RocketMQProducerConsumer;
 
 import java.util.List;
 
+/**
+ * 事务消息
+ */
 public class TransactionMessage {
 
     public static void main(String[] args) throws Exception {
@@ -33,36 +37,42 @@ public class TransactionMessage {
                             @Override
                             public LocalTransactionState checkLocalTransactionState(MessageExt msg) {
                                 System.out.println("本地事务消息回查: message=" + new String(msg.getBody()));
-                                return LocalTransactionState.COMMIT_MESSAGE;
+                                int id = NumberUtils.toInt(msg.getProperty("id"), -1);
+                                if (id > 0) {
+                                    if (id % 2 == 0) {
+                                        return LocalTransactionState.COMMIT_MESSAGE;
+                                    } else {
+                                        return LocalTransactionState.ROLLBACK_MESSAGE;
+                                    }
+                                }
+                                return LocalTransactionState.UNKNOW;
                             }
 
                         });
                     }
 
                     @Override
-                    public void execute(TransactionMQProducer producer, String topicName) {
+                    public void execute(TransactionMQProducer producer, String topicName) throws Exception {
                         for (int i = 0; ; i++) {
-                            try {
-                                Message message = new Message(topicName, ("message-" + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
-                                producer.sendMessageInTransaction(message, new LocalTransactionExecuter() {
+                            Message message = new Message(topicName, ("message-" + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
+                            message.putUserProperty("id", String.valueOf(i));
+                            producer.sendMessageInTransaction(message, new LocalTransactionExecuter() {
 
-                                    @Override
-                                    public LocalTransactionState executeLocalTransactionBranch(Message msg, Object arg) {
-                                        int i = (Integer) arg;
-                                        if (i % 2 == 0) {
-                                            System.out.println("本地事务commit: message=" + new String(msg.getBody()));
-                                            return LocalTransactionState.COMMIT_MESSAGE;
-                                        } else {
-                                            System.out.println("本地事务rollback: message=" + new String(msg.getBody()));
-                                            return LocalTransactionState.ROLLBACK_MESSAGE;
-                                        }
+                                @Override
+                                public LocalTransactionState executeLocalTransactionBranch(Message msg, Object arg) {
+                                    int i = (Integer) arg;
+                                    if (i % 2 == 0) {
+                                        System.out.println("本地事务commit: message=" + new String(msg.getBody()));
+                                        return LocalTransactionState.COMMIT_MESSAGE;
+                                    } else {
+                                        System.out.println("本地事务rollback: message=" + new String(msg.getBody()));
+                                        return LocalTransactionState.ROLLBACK_MESSAGE;
                                     }
+                                }
 
-                                }, i);
-                                Thread.sleep(1000);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                            }, i);
+                            System.out.println("生产事务消息: message=" + new String(message.getBody()));
+                            Thread.sleep(1000);
                         }
                     }
 
@@ -73,13 +83,11 @@ public class TransactionMessage {
                     public void init(DefaultMQPushConsumer consumer, String topicName) throws Exception {
                         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
                         consumer.subscribe(topicName, "*");
-                        consumer.setConsumeConcurrentlyMaxSpan(1);
                         consumer.registerMessageListener(new MessageListenerConcurrently() {
 
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-                                Message message = msgs.get(0);
-                                System.out.println("接收事务消息: message=" + new String(message.getBody()));
+                                System.err.println("消费事务消息: message=" + new String(msgs.get(0).getBody()));
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }
 

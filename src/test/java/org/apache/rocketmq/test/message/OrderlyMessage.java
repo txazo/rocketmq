@@ -15,6 +15,9 @@ import org.apache.rocketmq.test.common.RocketMQProducerConsumer;
 
 import java.util.List;
 
+/**
+ * 有序消息
+ */
 public class OrderlyMessage {
 
     public static void main(String[] args) throws Exception {
@@ -25,24 +28,20 @@ public class OrderlyMessage {
                 .producer(DefaultMQProducer.class, new RocketMQProducerConsumer.RocketMQExecutor<DefaultMQProducer>() {
 
                     @Override
-                    public void execute(DefaultMQProducer producer, String topicName) {
+                    public void execute(DefaultMQProducer producer, String topicName) throws Exception {
                         for (int i = 0; i < 3; i++) {
                             for (int j = 0; j < 5; j++) {
-                                try {
-                                    final Message message = new Message(topicName, ("message-" + i + "-" + j).getBytes(RemotingHelper.DEFAULT_CHARSET));
-                                    producer.send(message, new MessageQueueSelector() {
+                                final Message message = new Message(topicName, ("message-" + i + "-" + j).getBytes(RemotingHelper.DEFAULT_CHARSET));
+                                producer.send(message, new MessageQueueSelector() {
 
-                                        @Override
-                                        public MessageQueue select(List<MessageQueue> mqs, Message msg, Object arg) {
-                                            int i = (Integer) arg;
-                                            return mqs.get(i % mqs.size());
-                                        }
+                                    @Override
+                                    public MessageQueue select(List<MessageQueue> mqs, Message msg, Object arg) {
+                                        int i = (Integer) arg;
+                                        return mqs.get(i % mqs.size());
+                                    }
 
-                                    }, i);
-                                    System.out.println("发送有序消息: message=" + new String(message.getBody()));
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                }, i);
+                                System.out.println("生产有序消息: message=" + new String(message.getBody()));
                             }
                         }
                     }
@@ -58,8 +57,8 @@ public class OrderlyMessage {
 
                             @Override
                             public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
-                                Message message = msgs.get(0);
-                                System.out.println("接收有序消息: message=" + new String(message.getBody()));
+                                context.setAutoCommit(false);
+                                System.err.println("接收有序消息: message=" + new String(msgs.get(0).getBody()));
                                 try {
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {

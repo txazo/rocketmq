@@ -13,10 +13,10 @@ public class RocketMQProducerConsumer {
     private String namesrvAddr;
     private String groupName;
     private String topicName;
-    private RocketMQProducer producer = new RocketMQProducer();
-    private RocketMQConsumer consumer = new RocketMQConsumer();
     private Thread producerThread;
     private Thread consumerThread;
+    private RocketMQProducer producer = new RocketMQProducer();
+    private RocketMQConsumer consumer = new RocketMQConsumer();
     private CyclicBarrier barrier = new CyclicBarrier(2);
 
     public RocketMQProducerConsumer() {
@@ -51,8 +51,10 @@ public class RocketMQProducerConsumer {
 
     public RocketMQProducerConsumer start() throws Exception {
         producerThread = new Thread(producer);
-        producerThread.start();
         consumerThread = new Thread(consumer);
+        producer.setOther(consumerThread);
+        consumer.setOther(producerThread);
+        producerThread.start();
         consumerThread.start();
         return this;
     }
@@ -67,6 +69,7 @@ public class RocketMQProducerConsumer {
         protected T admin;
         protected RocketMQFactory<T> factory;
         protected RocketMQExecutor<T> executor;
+        protected Thread other;
 
         public RocketMQAdmin() {
         }
@@ -102,6 +105,7 @@ public class RocketMQProducerConsumer {
             } finally {
                 try {
                     shutdown();
+                    other.interrupt();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -114,6 +118,10 @@ public class RocketMQProducerConsumer {
 
         public void setExecutor(RocketMQExecutor<T> executor) {
             this.executor = executor;
+        }
+
+        public void setOther(Thread other) {
+            this.other = other;
         }
 
     }
@@ -144,7 +152,7 @@ public class RocketMQProducerConsumer {
         public void init(T t, String topicName) throws Exception {
         }
 
-        public void execute(T t, String topicName) {
+        public void execute(T t, String topicName) throws Exception {
         }
 
     }
