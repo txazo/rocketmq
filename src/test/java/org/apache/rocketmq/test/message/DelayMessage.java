@@ -21,8 +21,8 @@ public class DelayMessage {
     public static void main(String[] args) throws Exception {
         RocketMQProducerConsumer producerConsumer = new RocketMQProducerConsumer();
         producerConsumer.namesrvAddr("127.0.0.1:9876")
-                .group("group-schedule")
-                .topic("topic-schedule")
+                .group("group-delay")
+                .topic("topic-delay")
                 .producer(DefaultMQProducer.class, new RocketMQProducerConsumer.RocketMQExecutor<DefaultMQProducer>() {
 
                     @Override

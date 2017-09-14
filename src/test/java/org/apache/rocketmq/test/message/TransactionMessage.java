@@ -87,7 +87,7 @@ public class TransactionMessage {
 
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-                                System.err.printf("消费事务消息: message=%s%n" + new String(msgs.get(0).getBody()));
+                                System.err.printf("消费事务消息: message=%s%n", new String(msgs.get(0).getBody()));
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }
 
