@@ -35,7 +35,7 @@ public class BatchMessage {
                                 messages.add(new Message(topicName, ("message-" + i + "-" + j).getBytes(RemotingHelper.DEFAULT_CHARSET)));
                             }
                             SendResult result = producer.send(messages);
-                            System.out.println("发送批量消息: " + result);
+                            System.out.printf("生产批量消息: %s%n", result);
                             Thread.sleep(1000);
                         }
                     }
@@ -52,7 +52,7 @@ public class BatchMessage {
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
                                 for (MessageExt message : msgs) {
-                                    System.err.println("消费批量消息: message=" + new String(message.getBody()));
+                                    System.err.printf("消费批量消息: message=%s%n", new String(message.getBody()));
                                 }
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }

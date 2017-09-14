@@ -31,7 +31,7 @@ public class OrderlyMessage {
                     public void execute(DefaultMQProducer producer, String topicName) throws Exception {
                         for (int i = 0; i < 3; i++) {
                             for (int j = 0; j < 5; j++) {
-                                final Message message = new Message(topicName, ("message-" + i + "-" + j).getBytes(RemotingHelper.DEFAULT_CHARSET));
+                                Message message = new Message(topicName, ("message-" + i + "-" + j).getBytes(RemotingHelper.DEFAULT_CHARSET));
                                 producer.send(message, new MessageQueueSelector() {
 
                                     @Override
@@ -41,7 +41,7 @@ public class OrderlyMessage {
                                     }
 
                                 }, i);
-                                System.out.println("生产有序消息: message=" + new String(message.getBody()));
+                                System.out.printf("生产有序消息: message=%s%n", new String(message.getBody()));
                             }
                         }
                     }
@@ -58,7 +58,7 @@ public class OrderlyMessage {
                             @Override
                             public ConsumeOrderlyStatus consumeMessage(List<MessageExt> msgs, ConsumeOrderlyContext context) {
                                 context.setAutoCommit(false);
-                                System.err.println("接收有序消息: message=" + new String(msgs.get(0).getBody()));
+                                System.err.printf("接收有序消息: message=%s%n", new String(msgs.get(0).getBody()));
                                 try {
                                     Thread.sleep(2000);
                                 } catch (InterruptedException e) {

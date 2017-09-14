@@ -30,7 +30,7 @@ public class OnewayMessage {
                         for (int i = 0; ; i++) {
                             Message message = new Message(topicName, ("message-" + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
                             producer.sendOneway(message);
-                            System.out.println("生产单向消息: message=" + new String(message.getBody()));
+                            System.out.printf("生产单向消息: message=%s%n", new String(message.getBody()));
                             Thread.sleep(1000);
                         }
                     }
@@ -46,7 +46,7 @@ public class OnewayMessage {
 
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-                                System.err.println("消费单向消息: message=" + new String(msgs.get(0).getBody()));
+                                System.err.printf("消费单向消息: message=%s%n", new String(msgs.get(0).getBody()));
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }
 

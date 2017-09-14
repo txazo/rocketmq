@@ -36,7 +36,7 @@ public class TransactionMessage {
 
                             @Override
                             public LocalTransactionState checkLocalTransactionState(MessageExt msg) {
-                                System.out.println("本地事务消息回查: message=" + new String(msg.getBody()));
+                                System.out.printf("本地事务消息回查: message=%s%n", new String(msg.getBody()));
                                 int id = NumberUtils.toInt(msg.getProperty("id"), -1);
                                 if (id > 0) {
                                     if (id % 2 == 0) {
@@ -62,16 +62,16 @@ public class TransactionMessage {
                                 public LocalTransactionState executeLocalTransactionBranch(Message msg, Object arg) {
                                     int i = (Integer) arg;
                                     if (i % 2 == 0) {
-                                        System.out.println("本地事务commit: message=" + new String(msg.getBody()));
+                                        System.out.printf("本地事务commit: message=%s%n", new String(msg.getBody()));
                                         return LocalTransactionState.COMMIT_MESSAGE;
                                     } else {
-                                        System.out.println("本地事务rollback: message=" + new String(msg.getBody()));
+                                        System.out.printf("本地事务rollback: message=%s%n", new String(msg.getBody()));
                                         return LocalTransactionState.ROLLBACK_MESSAGE;
                                     }
                                 }
 
                             }, i);
-                            System.out.println("生产事务消息: message=" + new String(message.getBody()));
+                            System.out.printf("生产事务消息: message=%s%n", new String(message.getBody()));
                             Thread.sleep(1000);
                         }
                     }
@@ -87,7 +87,7 @@ public class TransactionMessage {
 
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-                                System.err.println("消费事务消息: message=" + new String(msgs.get(0).getBody()));
+                                System.err.printf("消费事务消息: message=%s%n" + new String(msgs.get(0).getBody()));
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }
 

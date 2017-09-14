@@ -32,7 +32,7 @@ public class BroadcastMessage {
                         for (int i = 0; ; i++) {
                             Message message = new Message(topicName, ("message-" + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
                             SendResult result = producer.send(message);
-                            System.out.println("发送广播消息: message=" + new String(message.getBody()));
+                            System.out.printf("生产广播消息: message=%s%n", new String(message.getBody()));
                             Thread.sleep(1000);
                         }
                     }
@@ -49,7 +49,7 @@ public class BroadcastMessage {
 
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-                                System.err.println("消费广播消息: message=" + new String(msgs.get(0).getBody()));
+                                System.err.printf("消费广播消息: message=%s%n", new String(msgs.get(0).getBody()));
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }
 

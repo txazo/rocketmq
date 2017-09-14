@@ -10,7 +10,7 @@ import java.util.concurrent.CyclicBarrier;
 
 public class RocketMQProducerConsumer {
 
-    private String namesrvAddr;
+    private String namesrvAddr = "127.0.0.1:9876";
     private String groupName;
     private String topicName;
     private Thread producerThread;

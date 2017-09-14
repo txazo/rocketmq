@@ -40,12 +40,12 @@ public class AsyncMessage {
 
                                 @Override
                                 public void onSuccess(SendResult result) {
-                                    System.out.println("发送异步消息: message=" + new String(message.getBody()));
+                                    System.out.printf("生产异步消息: message=%s%n", new String(message.getBody()));
                                 }
 
                                 @Override
                                 public void onException(Throwable e) {
-                                    System.err.println("发送异步消息失败: message=" + new String(message.getBody()));
+                                    System.err.printf("生产异步消息失败: message=%s%n", new String(message.getBody()));
                                 }
 
                             });
@@ -65,7 +65,7 @@ public class AsyncMessage {
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
                                 MessageExt message = msgs.get(0);
-                                System.err.println("消费异步消息: message=" + new String(message.getBody()));
+                                System.err.printf("消费异步消息: message=%s%n", new String(message.getBody()));
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }
 

@@ -34,7 +34,7 @@ public class PropertyFilter {
                             Message message = new Message(topicName, ("message-" + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
                             message.putUserProperty("a", String.valueOf(i));
                             SendResult result = producer.send(message);
-                            System.out.println("发送Property消息: property=" + JSON.toJSONString(message.getProperties()) + " message=" + new String(message.getBody()));
+                            System.out.printf("生产Property消息: property=%s message=%s%n", JSON.toJSONString(message.getProperties()), new String(message.getBody()));
                             Thread.sleep(1000);
                         }
                     }
@@ -51,7 +51,7 @@ public class PropertyFilter {
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
                                 MessageExt message = msgs.get(0);
-                                System.err.println("消费Property消息: property=" + JSON.toJSONString(message.getProperties()) + " message=" + new String(message.getBody()));
+                                System.err.printf("消费Property消息: property=%s message=%s%n", JSON.toJSONString(message.getProperties()), new String(message.getBody()));
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }
 
