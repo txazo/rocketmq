@@ -40,6 +40,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * 路由信息管理
+ */
 public class RouteInfoManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
@@ -727,10 +730,18 @@ public class RouteInfoManager {
     }
 }
 
+/**
+ * Broker存活信息
+ */
 class BrokerLiveInfo {
+
+    // 创建时间
     private long lastUpdateTimestamp;
+    //
     private DataVersion dataVersion;
+    // 通道
     private Channel channel;
+    // HA Server地址
     private String haServerAddr;
 
     public BrokerLiveInfo(long lastUpdateTimestamp, DataVersion dataVersion, Channel channel,

@@ -76,7 +76,7 @@ public class RocketMQProducerConsumer {
 
         public void init() throws Exception {
             admin = factory.newInstance(groupName);
-            callMethod(admin, "setNamesrvAddr", new Class<?>[]{String.class}, new Object[]{namesrvAddr});
+            callMethod(admin, "setNamesrvAddr", new Class<?>[]{String.class}, namesrvAddr);
             executor.init(admin, topicName);
         }
 

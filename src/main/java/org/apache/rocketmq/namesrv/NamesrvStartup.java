@@ -40,6 +40,9 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
+/**
+ * Namesrv启动
+ */
 public class NamesrvStartup {
     public static Properties properties = null;
     public static CommandLine commandLine = null;
@@ -51,10 +54,12 @@ public class NamesrvStartup {
     public static NamesrvController main0(String[] args) {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
 
+        // socket发送缓冲区大小
         if (null == System.getProperty(NettySystemConfig.COM_ROCKETMQ_REMOTING_SOCKET_SNDBUF_SIZE)) {
             NettySystemConfig.socketSndbufSize = 4096;
         }
 
+        // socket接受缓冲区大小
         if (null == System.getProperty(NettySystemConfig.COM_ROCKETMQ_REMOTING_SOCKET_RCVBUF_SIZE)) {
             NettySystemConfig.socketRcvbufSize = 4096;
         }
@@ -69,8 +74,11 @@ public class NamesrvStartup {
                 return null;
             }
 
+            // Namesrv配置
             final NamesrvConfig namesrvConfig = new NamesrvConfig();
+            // Netty配置
             final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+            // 设置Netty监听端口为9876
             nettyServerConfig.setListenPort(9876);
             if (commandLine.hasOption('c')) {
                 String file = commandLine.getOptionValue('c');
@@ -108,14 +116,17 @@ public class NamesrvStartup {
             configurator.doConfigure(namesrvConfig.getRocketmqHome() + "/conf/logback_namesrv.xml");
             final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
+            // 打印配置信息到${user.home}/logs/rocketmqlogs/namesrv.log文件
             MixAll.printObjectProperties(log, namesrvConfig);
             MixAll.printObjectProperties(log, nettyServerConfig);
 
+            // Namesrv控制器
             final NamesrvController controller = new NamesrvController(namesrvConfig, nettyServerConfig);
 
             // remember all configs to prevent discard
             controller.getConfiguration().registerConfig(properties);
 
+            // 初始化
             boolean initResult = controller.initialize();
             if (!initResult) {
                 controller.shutdown();
@@ -130,6 +141,7 @@ public class NamesrvStartup {
                 }
             }));
 
+            // 启动
             controller.start();
 
             String tip = "The Name Server boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();
