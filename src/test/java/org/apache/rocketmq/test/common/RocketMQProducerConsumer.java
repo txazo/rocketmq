@@ -81,7 +81,7 @@ public class RocketMQProducerConsumer {
         }
 
         public void start() throws Exception {
-            callMethod(admin, "start", new Class<?>[]{}, new Object[]{});
+            callMethod(admin, "start", new Class<?>[]{});
         }
 
         public void execute() throws Exception {
@@ -90,7 +90,7 @@ public class RocketMQProducerConsumer {
         }
 
         public void shutdown() throws Exception {
-            callMethod(admin, "shutdown", new Class<?>[]{}, new Object[]{});
+            callMethod(admin, "shutdown", new Class<?>[]{});
         }
 
         @Override
@@ -141,7 +141,7 @@ public class RocketMQProducerConsumer {
         }
 
         public T newInstance(String groupName) throws Exception {
-            Constructor c = clazz.getDeclaredConstructor(new Class<?>[]{String.class});
+            Constructor c = clazz.getDeclaredConstructor(String.class);
             return (T) c.newInstance(groupName);
         }
 
