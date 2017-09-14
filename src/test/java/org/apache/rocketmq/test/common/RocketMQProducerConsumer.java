@@ -6,15 +6,18 @@ import org.apache.rocketmq.client.producer.MQProducer;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.concurrent.CyclicBarrier;
 
 public class RocketMQProducerConsumer {
 
-    private String groupName;
     private String namesrvAddr;
+    private String groupName;
+    private String topicName;
     private RocketMQProducer producer = new RocketMQProducer();
     private RocketMQConsumer consumer = new RocketMQConsumer();
     private Thread producerThread;
     private Thread consumerThread;
+    private CyclicBarrier barrier = new CyclicBarrier(2);
 
     public RocketMQProducerConsumer() {
     }
@@ -26,6 +29,11 @@ public class RocketMQProducerConsumer {
 
     public RocketMQProducerConsumer group(String groupName) {
         this.groupName = groupName;
+        return this;
+    }
+
+    public RocketMQProducerConsumer topic(String topicName) {
+        this.topicName = topicName;
         return this;
     }
 
@@ -66,6 +74,7 @@ public class RocketMQProducerConsumer {
         public void init() throws Exception {
             admin = factory.newInstance(groupName);
             callMethod(admin, "setNamesrvAddr", new Class<?>[]{String.class}, new Object[]{namesrvAddr});
+            executor.init(admin, topicName);
         }
 
         public void start() throws Exception {
@@ -73,7 +82,8 @@ public class RocketMQProducerConsumer {
         }
 
         public void execute() throws Exception {
-            executor.execute(admin);
+            barrier.await();
+            executor.execute(admin, topicName);
         }
 
         public void shutdown() throws Exception {
@@ -84,7 +94,8 @@ public class RocketMQProducerConsumer {
         public void run() {
             try {
                 init();
-                doRun();
+                start();
+                execute();
                 Thread.sleep(1000 * 60 * 60);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -97,8 +108,6 @@ public class RocketMQProducerConsumer {
             }
         }
 
-        protected abstract void doRun() throws Exception;
-
         public void setFactory(RocketMQFactory<T> factory) {
             this.factory = factory;
         }
@@ -110,23 +119,9 @@ public class RocketMQProducerConsumer {
     }
 
     private class RocketMQProducer<T extends MQProducer> extends RocketMQAdmin<T> {
-
-        @Override
-        protected void doRun() throws Exception {
-            start();
-            execute();
-        }
-
     }
 
     private class RocketMQConsumer<T extends MQConsumer> extends RocketMQAdmin<T> {
-
-        @Override
-        protected void doRun() throws Exception {
-            execute();
-            start();
-        }
-
     }
 
     private static class RocketMQFactory<T extends MQAdmin> {
@@ -144,9 +139,13 @@ public class RocketMQProducerConsumer {
 
     }
 
-    public static interface RocketMQExecutor<T extends MQAdmin> {
+    public static abstract class RocketMQExecutor<T extends MQAdmin> {
 
-        void execute(T t) throws Exception;
+        public void init(T t, String topicName) throws Exception {
+        }
+
+        public void execute(T t, String topicName) {
+        }
 
     }
 

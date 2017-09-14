@@ -23,3 +23,5 @@
 -XX:MaxDirectMemorySize=15g
 -XX:-UseLargePages
 -XX:-UseBiasedLocking
+-Drocketmq.broker.diskSpaceWarningLevelRatio=0.98
+-Drocketmq.broker.diskSpaceCleanForciblyRatio=0.96
