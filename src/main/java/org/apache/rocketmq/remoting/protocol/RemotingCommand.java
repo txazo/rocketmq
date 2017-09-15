@@ -32,6 +32,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 远程命令
+ */
 public class RemotingCommand {
     public static final String SERIALIZE_TYPE_PROPERTY = "rocketmq.serialize.type";
     public static final String SERIALIZE_TYPE_ENV = "ROCKETMQ_SERIALIZE_TYPE";
@@ -57,6 +60,7 @@ public class RemotingCommand {
     private static volatile int configVersion = -1;
     private static AtomicInteger requestId = new AtomicInteger(0);
 
+    // 序列化类型
     private static SerializeType serializeTypeConfigInThisServer = SerializeType.JSON;
 
     static {
@@ -70,22 +74,33 @@ public class RemotingCommand {
         }
     }
 
+    // 命令类型
     private int code;
+    // 语言类型
     private LanguageCode language = LanguageCode.JAVA;
+    // 版本号
     private int version = 0;
+    // 请求id
     private int opaque = requestId.getAndIncrement();
+    // 标记
     private int flag = 0;
+    // 备注
     private String remark;
+    // 额外字段
     private HashMap<String, String> extFields;
+    // 自定义header
     private transient CommandCustomHeader customHeader;
-
+    // 当前RPC序列化类型
     private SerializeType serializeTypeCurrentRPC = serializeTypeConfigInThisServer;
-
+    // 消息主体
     private transient byte[] body;
 
     protected RemotingCommand() {
     }
 
+    /**
+     * 创建请求命令
+     */
     public static RemotingCommand createRequestCommand(int code, CommandCustomHeader customHeader) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.setCode(code);
@@ -111,9 +126,13 @@ public class RemotingCommand {
         return createResponseCommand(RemotingSysResponseCode.SYSTEM_ERROR, "not set any response code", classHeader);
     }
 
+    /**
+     * 创建响应命令
+     */
     public static RemotingCommand createResponseCommand(int code, String remark,
         Class<? extends CommandCustomHeader> classHeader) {
         RemotingCommand cmd = new RemotingCommand();
+        // 标记响应类型
         cmd.markResponseType();
         cmd.setCode(code);
         cmd.setRemark(remark);
@@ -143,19 +162,25 @@ public class RemotingCommand {
     }
 
     public static RemotingCommand decode(final ByteBuffer byteBuffer) {
+        // 读总长度
         int length = byteBuffer.limit();
         int oriHeaderLen = byteBuffer.getInt();
+        // header长度
         int headerLength = getHeaderLength(oriHeaderLen);
 
         byte[] headerData = new byte[headerLength];
+        // 读header数据
         byteBuffer.get(headerData);
 
+        // 反序列化header
         RemotingCommand cmd = headerDecode(headerData, getProtocolType(oriHeaderLen));
 
+        // body长度
         int bodyLength = length - 4 - headerLength;
         byte[] bodyData = null;
         if (bodyLength > 0) {
             bodyData = new byte[bodyLength];
+            // 读body数据
             byteBuffer.get(bodyData);
         }
         cmd.body = bodyData;
@@ -345,16 +370,16 @@ public class RemotingCommand {
 
         ByteBuffer result = ByteBuffer.allocate(4 + length);
 
-        // length
+        // 总长度(4字节)
         result.putInt(length);
 
-        // header length
+        // header长度和序列化类型(4字节)
         result.put(markProtocolType(headerData.length, serializeTypeCurrentRPC));
 
-        // header data
+        // header数据
         result.put(headerData);
 
-        // body data;
+        // body数据
         if (this.body != null) {
             result.put(this.body);
         }
@@ -365,7 +390,9 @@ public class RemotingCommand {
     }
 
     private byte[] headerEncode() {
+        // 自定义header复制到extFields
         this.makeCustomHeaderToNet();
+        // 序列化
         if (SerializeType.ROCKETMQ == serializeTypeCurrentRPC) {
             return RocketMQSerializable.rocketMQProtocolEncode(this);
         } else {
@@ -405,6 +432,9 @@ public class RemotingCommand {
         return encodeHeader(this.body != null ? this.body.length : 0);
     }
 
+    /**
+     * 编码header
+     */
     public ByteBuffer encodeHeader(final int bodyLength) {
         // 1> header length size
         int length = 4;

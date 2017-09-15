@@ -18,9 +18,16 @@ package org.apache.rocketmq.remoting.netty;
 
 import io.netty.channel.Channel;
 
+/**
+ * Netty事件
+ */
 public class NettyEvent {
+
+    // Netty事件类型
     private final NettyEventType type;
+    // 远程主机地址
     private final String remoteAddr;
+    // 通道
     private final Channel channel;
 
     public NettyEvent(NettyEventType type, String remoteAddr, Channel channel) {

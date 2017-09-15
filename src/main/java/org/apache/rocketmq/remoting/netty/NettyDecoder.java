@@ -27,6 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Netty解码器
+ */
 public class NettyDecoder extends LengthFieldBasedFrameDecoder {
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
     private static final int FRAME_MAX_LENGTH = //
@@ -47,6 +50,7 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 
             ByteBuffer byteBuffer = frame.nioBuffer();
 
+            // 消息解码为RemotingCommand
             return RemotingCommand.decode(byteBuffer);
         } catch (Exception e) {
             log.error("decode exception, " + RemotingHelper.parseChannelRemoteAddr(ctx.channel()), e);

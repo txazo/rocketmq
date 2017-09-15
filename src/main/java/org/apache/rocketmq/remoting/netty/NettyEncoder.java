@@ -27,6 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Netty编码器
+ */
 public class NettyEncoder extends MessageToByteEncoder<RemotingCommand> {
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
 
@@ -34,8 +37,10 @@ public class NettyEncoder extends MessageToByteEncoder<RemotingCommand> {
     public void encode(ChannelHandlerContext ctx, RemotingCommand remotingCommand, ByteBuf out)
         throws Exception {
         try {
+            // 编码header
             ByteBuffer header = remotingCommand.encodeHeader();
             out.writeBytes(header);
+            // 编码body
             byte[] body = remotingCommand.getBody();
             if (body != null) {
                 out.writeBytes(body);

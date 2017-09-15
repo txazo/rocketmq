@@ -47,8 +47,11 @@ public class ResponseFuture {
     }
 
     public void executeInvokeCallback() {
+        // 回调不为null
         if (invokeCallback != null) {
+            // 控制只回调一次
             if (this.executeCallbackOnlyOnce.compareAndSet(false, true)) {
+                // 回调
                 invokeCallback.operationComplete(this);
             }
         }
@@ -65,13 +68,21 @@ public class ResponseFuture {
         return diff > this.timeoutMillis;
     }
 
+    /**
+     * 等待response
+     */
     public RemotingCommand waitResponse(final long timeoutMillis) throws InterruptedException {
+        // 等待直到超时
         this.countDownLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
         return this.responseCommand;
     }
 
+    /**
+     * 设置response
+     */
     public void putResponse(final RemotingCommand responseCommand) {
         this.responseCommand = responseCommand;
+        // 唤醒等待
         this.countDownLatch.countDown();
     }
 

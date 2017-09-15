@@ -23,9 +23,16 @@ import org.apache.rocketmq.common.MixAll;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Broker信息
+ */
 public class BrokerData implements Comparable<BrokerData> {
+
+    // 集群名称
     private String cluster;
+    // broker名称
     private String brokerName;
+    // brokerId-broker地址映射表
     private HashMap<Long/* brokerId */, String/* broker address */> brokerAddrs;
 
     public BrokerData() {
@@ -38,9 +45,14 @@ public class BrokerData implements Comparable<BrokerData> {
         this.brokerAddrs = brokerAddrs;
     }
 
+    /**
+     * 选取broker地址
+     */
     public String selectBrokerAddr() {
+        // 默认选取master节点地址, brokerId = 0
         String value = this.brokerAddrs.get(MixAll.MASTER_ID);
         if (null == value) {
+            // 无master节点, 选取slave节点地址
             for (Map.Entry<Long, String> entry : this.brokerAddrs.entrySet()) {
                 return entry.getValue();
             }

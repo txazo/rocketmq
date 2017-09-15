@@ -54,31 +54,47 @@ public class NamesrvController {
 
     private ExecutorService remotingExecutor;
 
+    // 配置
     private Configuration configuration;
 
     public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {
+        // Namesrv配置
         this.namesrvConfig = namesrvConfig;
+
+        // Netty Server配置
         this.nettyServerConfig = nettyServerConfig;
+
+        // 键值对配置管理器
         this.kvConfigManager = new KVConfigManager(this);
+
+        // 路由信息管理器
         this.routeInfoManager = new RouteInfoManager();
+
+        // Broker管家服务
         this.brokerHousekeepingService = new BrokerHousekeepingService(this);
+
+        // Namesrv配置和Netty Server配置注册到Configuration
         this.configuration = new Configuration(
             log,
             this.namesrvConfig, this.nettyServerConfig
         );
+
+        // 设置Configuration的存储路径
         this.configuration.setStorePathFromConfig(this.namesrvConfig, "configStorePath");
     }
 
     public boolean initialize() {
-
+        // 从文件中加载配置
         this.kvConfigManager.load();
 
-        // Netty服务端
+        // Netty Server
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
+        // 请求处理线程池
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
+        // 注册请求处理器
         this.registerProcessor();
 
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {

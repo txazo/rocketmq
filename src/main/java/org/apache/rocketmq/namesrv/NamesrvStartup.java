@@ -76,9 +76,9 @@ public class NamesrvStartup {
 
             // Namesrv配置
             final NamesrvConfig namesrvConfig = new NamesrvConfig();
-            // Netty配置
+            // Netty Server配置
             final NettyServerConfig nettyServerConfig = new NettyServerConfig();
-            // 设置Netty监听端口为9876
+            // 设置Netty Server监听端口为9876
             nettyServerConfig.setListenPort(9876);
             if (commandLine.hasOption('c')) {
                 String file = commandLine.getOptionValue('c');
@@ -102,8 +102,10 @@ public class NamesrvStartup {
                 System.exit(0);
             }
 
+            // 命令行配置转换到Namesrv配置中
             MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
 
+            // RocketmqHome校验
             if (null == namesrvConfig.getRocketmqHome()) {
                 System.out.printf("Please set the " + MixAll.ROCKETMQ_HOME_ENV + " variable in your environment to match the location of the RocketMQ installation%n");
                 System.exit(-2);
@@ -113,10 +115,12 @@ public class NamesrvStartup {
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(lc);
             lc.reset();
+            // 加载logback配置文件
             configurator.doConfigure(namesrvConfig.getRocketmqHome() + "/conf/logback_namesrv.xml");
+            // Namesrv日志
             final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
-            // 打印配置信息到${user.home}/logs/rocketmqlogs/namesrv.log文件
+            // 打印配置信息到${user.home}/logs/rocketmqlogs/namesrv.log日志文件
             MixAll.printObjectProperties(log, namesrvConfig);
             MixAll.printObjectProperties(log, nettyServerConfig);
 
@@ -126,7 +130,7 @@ public class NamesrvStartup {
             // remember all configs to prevent discard
             controller.getConfiguration().registerConfig(properties);
 
-            // 初始化
+            // Namesrv初始化
             boolean initResult = controller.initialize();
             if (!initResult) {
                 controller.shutdown();
@@ -141,9 +145,10 @@ public class NamesrvStartup {
                 }
             }));
 
-            // 启动
+            // Namesrv启动
             controller.start();
 
+            // Namesrv启动成功
             String tip = "The Name Server boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();
             log.info(tip);
             System.out.printf(tip + "%n");

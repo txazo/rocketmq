@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Broker管家服务
- *
- * 通道关闭、异常、空闲时, 删除broker
  */
 public class BrokerHousekeepingService implements ChannelEventListener {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
@@ -40,18 +38,30 @@ public class BrokerHousekeepingService implements ChannelEventListener {
     public void onChannelConnect(String remoteAddr, Channel channel) {
     }
 
+    /**
+     * 通道关闭
+     */
     @Override
     public void onChannelClose(String remoteAddr, Channel channel) {
+        // 销毁通道
         this.namesrvController.getRouteInfoManager().onChannelDestroy(remoteAddr, channel);
     }
 
+    /**
+     * 通道异常
+     */
     @Override
     public void onChannelException(String remoteAddr, Channel channel) {
+        // 销毁通道
         this.namesrvController.getRouteInfoManager().onChannelDestroy(remoteAddr, channel);
     }
 
+    /**
+     * 通道空闲
+     */
     @Override
     public void onChannelIdle(String remoteAddr, Channel channel) {
+        // 销毁通道
         this.namesrvController.getRouteInfoManager().onChannelDestroy(remoteAddr, channel);
     }
 }

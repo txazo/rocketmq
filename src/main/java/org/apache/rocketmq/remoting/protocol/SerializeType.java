@@ -17,8 +17,14 @@
 
 package org.apache.rocketmq.remoting.protocol;
 
+/**
+ * 序列化类型
+ */
 public enum SerializeType {
+
+    // json
     JSON((byte) 0),
+    // rocketmq
     ROCKETMQ((byte) 1);
 
     private byte code;

@@ -41,16 +41,25 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * 路由信息管理
+ * 路由信息管理器
  */
 public class RouteInfoManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
+    // topic-队列映射表
     private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
+
+    // broker-地址映射表
     private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
+
+    // 集群-broker映射表
     private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
+
+    // broker存活表
     private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;
+
     private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
 
     public RouteInfoManager() {
@@ -418,6 +427,9 @@ public class RouteInfoManager {
         }
     }
 
+    /**
+     * 通道销毁
+     */
     public void onChannelDestroy(String remoteAddr, Channel channel) {
         String brokerAddrFound = null;
         if (channel != null) {
@@ -735,9 +747,9 @@ public class RouteInfoManager {
  */
 class BrokerLiveInfo {
 
-    // 创建时间
+    // 最近更新时间戳
     private long lastUpdateTimestamp;
-    //
+    // 数据版本
     private DataVersion dataVersion;
     // 通道
     private Channel channel;

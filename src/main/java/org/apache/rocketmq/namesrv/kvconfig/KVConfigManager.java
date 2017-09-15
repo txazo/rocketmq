@@ -31,9 +31,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * K-V配置
- *
- * Namespace - (key - Value)
+ * 键值对配置管理器, 管理命名空间下的键值对
  */
 public class KVConfigManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
@@ -42,7 +40,7 @@ public class KVConfigManager {
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    // K-V配置表
+    // 键值对配置哈希表
     private final HashMap<String/* Namespace */, HashMap<String/* Key */, String/* Value */>> configTable =
         new HashMap<String, HashMap<String, String>>();
 
@@ -178,6 +176,9 @@ public class KVConfigManager {
         return null;
     }
 
+    /**
+     * 定期打印键值对配置到日志文件
+     */
     public void printAllPeriodically() {
         try {
             this.lock.readLock().lockInterruptibly();
