@@ -55,6 +55,7 @@ public class BrokerStartup {
 
     public static BrokerController start(BrokerController controller) {
         try {
+            // Broker启动
             controller.start();
             String tip = "The broker[" + controller.getBrokerConfig().getBrokerName() + ", "
                 + controller.getBrokerAddr() + "] boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();
@@ -76,10 +77,12 @@ public class BrokerStartup {
     public static BrokerController createBrokerController(String[] args) {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
 
+        // socket发送缓冲区大小
         if (null == System.getProperty(NettySystemConfig.COM_ROCKETMQ_REMOTING_SOCKET_SNDBUF_SIZE)) {
             NettySystemConfig.socketSndbufSize = 131072;
         }
 
+        // socket接收缓冲区大小
         if (null == System.getProperty(NettySystemConfig.COM_ROCKETMQ_REMOTING_SOCKET_RCVBUF_SIZE)) {
             NettySystemConfig.socketRcvbufSize = 131072;
         }
@@ -93,10 +96,15 @@ public class BrokerStartup {
                 System.exit(-1);
             }
 
+            // Broker配置
             final BrokerConfig brokerConfig = new BrokerConfig();
+            // Netty Server配置
             final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+            // Netty Client配置
             final NettyClientConfig nettyClientConfig = new NettyClientConfig();
+            // Netty Server监听端口
             nettyServerConfig.setListenPort(10911);
+            // 消息存储配置
             final MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
 
             if (BrokerRole.SLAVE == messageStoreConfig.getBrokerRole()) {
@@ -125,12 +133,14 @@ public class BrokerStartup {
 
             MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), brokerConfig);
 
+            // RocketmqHome校验
             if (null == brokerConfig.getRocketmqHome()) {
                 System.out.printf("Please set the " + MixAll.ROCKETMQ_HOME_ENV
                     + " variable in your environment to match the location of the RocketMQ installation");
                 System.exit(-2);
             }
 
+            // NamesrvAddr校验
             String namesrvAddr = brokerConfig.getNamesrvAddr();
             if (null != namesrvAddr) {
                 try {
@@ -149,6 +159,7 @@ public class BrokerStartup {
             switch (messageStoreConfig.getBrokerRole()) {
                 case ASYNC_MASTER:
                 case SYNC_MASTER:
+                    // 同步master的brokerId为0
                     brokerConfig.setBrokerId(MixAll.MASTER_ID);
                     break;
                 case SLAVE:
@@ -162,11 +173,13 @@ public class BrokerStartup {
                     break;
             }
 
+            // HA监听端口
             messageStoreConfig.setHaListenPort(nettyServerConfig.getListenPort() + 1);
             LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(lc);
             lc.reset();
+            // 加载logback配置文件
             configurator.doConfigure(brokerConfig.getRocketmqHome() + "/conf/logback_broker.xml");
 
             if (commandLine.hasOption('p')) {
@@ -199,6 +212,7 @@ public class BrokerStartup {
             // remember all configs to prevent discard
             controller.getConfiguration().registerConfig(properties);
 
+            // Broker初始化
             boolean initResult = controller.initialize();
             if (!initResult) {
                 controller.shutdown();
