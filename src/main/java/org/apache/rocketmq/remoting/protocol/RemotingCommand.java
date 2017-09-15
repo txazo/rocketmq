@@ -58,6 +58,8 @@ public class RemotingCommand {
     private static final String BOOLEAN_CANONICAL_NAME_1 = Boolean.class.getCanonicalName();
     private static final String BOOLEAN_CANONICAL_NAME_2 = boolean.class.getCanonicalName();
     private static volatile int configVersion = -1;
+
+    // 请求id自增
     private static AtomicInteger requestId = new AtomicInteger(0);
 
     // 序列化类型
@@ -92,7 +94,7 @@ public class RemotingCommand {
     private transient CommandCustomHeader customHeader;
     // 当前RPC序列化类型
     private SerializeType serializeTypeCurrentRPC = serializeTypeConfigInThisServer;
-    // 消息主体
+    // body
     private transient byte[] body;
 
     protected RemotingCommand() {

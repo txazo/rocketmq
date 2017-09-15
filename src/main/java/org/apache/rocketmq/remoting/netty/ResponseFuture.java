@@ -24,18 +24,30 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * 响应Future
+ */
 public class ResponseFuture {
+
+    // 请求id
     private final int opaque;
+    // 超时时间
     private final long timeoutMillis;
+    // 响应回调
     private final InvokeCallback invokeCallback;
+    // 请求开始时间
     private final long beginTimestamp = System.currentTimeMillis();
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
     private final SemaphoreReleaseOnlyOnce once;
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
+
+    // 响应命令
     private volatile RemotingCommand responseCommand;
+    // 请求是否发送成功
     private volatile boolean sendRequestOK = true;
+    // 异常
     private volatile Throwable cause;
 
     public ResponseFuture(int opaque, long timeoutMillis, InvokeCallback invokeCallback,

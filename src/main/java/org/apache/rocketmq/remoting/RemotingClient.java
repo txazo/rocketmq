@@ -26,26 +26,71 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * 远程Client
+ */
 public interface RemotingClient extends RemotingService {
 
+    /**
+     * 更新NameServer地址列表
+     *
+     * @param addrs 地址列表
+     */
     public void updateNameServerAddressList(final List<String> addrs);
 
+    /**
+     * 获取NameServer地址列表
+     */
     public List<String> getNameServerAddressList();
 
+    /**
+     * 同步调用
+     *
+     * @param addr              server地址
+     * @param request           请求
+     * @param timeoutMillis     超时时间
+     */
     public RemotingCommand invokeSync(final String addr, final RemotingCommand request,
                                       final long timeoutMillis) throws InterruptedException, RemotingConnectException,
         RemotingSendRequestException, RemotingTimeoutException;
 
+    /**
+     * 异步调用
+     *
+     * @param addr              server地址
+     * @param request           请求
+     * @param timeoutMillis     超时时间
+     * @param invokeCallback    回调
+     */
     public void invokeAsync(final String addr, final RemotingCommand request, final long timeoutMillis,
                             final InvokeCallback invokeCallback) throws InterruptedException, RemotingConnectException,
         RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
 
+    /**
+     * 单向调用
+     *
+     * @param addr              server地址
+     * @param request           请求
+     * @param timeoutMillis     超时时间
+     */
     public void invokeOneway(final String addr, final RemotingCommand request, final long timeoutMillis)
         throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException,
         RemotingTimeoutException, RemotingSendRequestException;
 
+    /**
+     * 注册请求处理器
+     *
+     * @param requestCode       请求类型
+     * @param processor         请求处理器
+     * @param executor          执行线程池
+     */
     public void registerProcessor(final int requestCode, final NettyRequestProcessor processor,
                                   final ExecutorService executor);
 
+    /**
+     * 通道是否可写
+     *
+     * @param addr      server地址
+     */
     public boolean isChannelWriteable(final String addr);
 }

@@ -28,8 +28,13 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+/**
+ * 远程帮助类
+ */
 public class RemotingHelper {
     public static final String ROCKETMQ_REMOTING = "RocketmqRemoting";
+
+    // 默认字符编码
     public static final String DEFAULT_CHARSET = "UTF-8";
 
     public static String exceptionSimpleDesc(final Throwable e) {

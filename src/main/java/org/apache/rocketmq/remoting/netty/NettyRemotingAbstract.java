@@ -392,12 +392,15 @@ public abstract class NettyRemotingAbstract {
                 }
             });
 
+            // 等待响应
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
             if (null == responseCommand) {
                 if (responseFuture.isSendRequestOK()) {
+                    // 响应超时
                     throw new RemotingTimeoutException(RemotingHelper.parseSocketAddressAddr(addr), timeoutMillis,
                         responseFuture.getCause());
                 } else {
+                    // 发送失败
                     throw new RemotingSendRequestException(RemotingHelper.parseSocketAddressAddr(addr), responseFuture.getCause());
                 }
             }
@@ -412,7 +415,9 @@ public abstract class NettyRemotingAbstract {
     public void invokeAsyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis,
         final InvokeCallback invokeCallback)
         throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+        // 请求id
         final int opaque = request.getOpaque();
+        // 获取异步请求许可
         boolean acquired = this.semaphoreAsync.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);
         if (acquired) {
             final SemaphoreReleaseOnlyOnce once = new SemaphoreReleaseOnlyOnce(this.semaphoreAsync);
@@ -433,6 +438,7 @@ public abstract class NettyRemotingAbstract {
                         responseFuture.putResponse(null);
                         responseTable.remove(opaque);
                         try {
+                            // 执行回调
                             executeInvokeCallback(responseFuture);
                         } catch (Throwable e) {
                             PLOG.warn("excute callback in writeAndFlush addListener, and callback throw", e);
@@ -466,7 +472,9 @@ public abstract class NettyRemotingAbstract {
 
     public void invokeOnewayImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis)
         throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+        // 标记单向RPC
         request.markOnewayRPC();
+        // 获取单向请求许可
         boolean acquired = this.semaphoreOneway.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);
         if (acquired) {
             final SemaphoreReleaseOnlyOnce once = new SemaphoreReleaseOnlyOnce(this.semaphoreOneway);

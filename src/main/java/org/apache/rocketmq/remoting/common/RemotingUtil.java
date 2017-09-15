@@ -31,6 +31,9 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+/**
+ * 远程工具类
+ */
 public class RemotingUtil {
     public static final String OS_NAME = System.getProperty("os.name");
 

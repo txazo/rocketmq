@@ -314,14 +314,17 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     @Override
     public RemotingCommand invokeSync(String addr, final RemotingCommand request, long timeoutMillis)
         throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException {
+        // 获取或创建通道
         final Channel channel = this.getAndCreateChannel(addr);
         if (channel != null && channel.isActive()) {
             try {
                 if (this.rpcHook != null) {
+                    // RPC钩子请求前回调
                     this.rpcHook.doBeforeRequest(addr, request);
                 }
                 RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);
                 if (this.rpcHook != null) {
+                    // RPC钩子响应后回调
                     this.rpcHook.doAfterResponse(RemotingHelper.parseChannelRemoteAddr(channel), request, response);
                 }
                 return response;
@@ -462,10 +465,12 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     public void invokeAsync(String addr, RemotingCommand request, long timeoutMillis, InvokeCallback invokeCallback)
         throws InterruptedException, RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException,
         RemotingSendRequestException {
+        // 获取或创建通道
         final Channel channel = this.getAndCreateChannel(addr);
         if (channel != null && channel.isActive()) {
             try {
                 if (this.rpcHook != null) {
+                    // RPC钩子请求前回调
                     this.rpcHook.doBeforeRequest(addr, request);
                 }
                 this.invokeAsyncImpl(channel, request, timeoutMillis, invokeCallback);
@@ -483,10 +488,12 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     @Override
     public void invokeOneway(String addr, RemotingCommand request, long timeoutMillis) throws InterruptedException,
         RemotingConnectException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+        // 获取或创建通道
         final Channel channel = this.getAndCreateChannel(addr);
         if (channel != null && channel.isActive()) {
             try {
                 if (this.rpcHook != null) {
+                    // RPC钩子请求前回调
                     this.rpcHook.doBeforeRequest(addr, request);
                 }
                 this.invokeOnewayImpl(channel, request, timeoutMillis);

@@ -17,17 +17,32 @@
 
 package org.apache.rocketmq.remoting.netty;
 
+/**
+ * Netty系统配置
+ */
 public class NettySystemConfig {
+
+    // 是否开启ByteBuf池分配
     public static final String COM_ROCKETMQ_REMOTING_NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE =
         "com.rocketmq.remoting.nettyPooledByteBufAllocatorEnable";
+
+    // socket发送缓冲区大小
     public static final String COM_ROCKETMQ_REMOTING_SOCKET_SNDBUF_SIZE = //
         "com.rocketmq.remoting.socket.sndbuf.size";
+
+    // socket接收缓冲区大小
     public static final String COM_ROCKETMQ_REMOTING_SOCKET_RCVBUF_SIZE = //
         "com.rocketmq.remoting.socket.rcvbuf.size";
+
+    // 单向请求最大并发数
     public static final String COM_ROCKETMQ_REMOTING_CLIENT_ASYNC_SEMAPHORE_VALUE = //
         "com.rocketmq.remoting.clientAsyncSemaphoreValue";
+
+    // 异步请求最大并发数
     public static final String COM_ROCKETMQ_REMOTING_CLIENT_ONEWAY_SEMAPHORE_VALUE = //
         "com.rocketmq.remoting.clientOnewaySemaphoreValue";
+
+
     public static final boolean NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE = //
         Boolean
             .parseBoolean(System.getProperty(COM_ROCKETMQ_REMOTING_NETTY_POOLED_BYTE_BUF_ALLOCATOR_ENABLE, "false"));
