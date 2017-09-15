@@ -24,8 +24,13 @@ import org.slf4j.Logger;
 
 import java.util.concurrent.*;
 
+/**
+ * Pull消息服务
+ */
 public class PullMessageService extends ServiceThread {
     private final Logger log = ClientLogger.getLog();
+
+    // Pull请求队列
     private final LinkedBlockingQueue<PullRequest> pullRequestQueue = new LinkedBlockingQueue<PullRequest>();
     private final MQClientInstance mQClientFactory;
     private final ScheduledExecutorService scheduledExecutorService = Executors

@@ -341,6 +341,7 @@ public abstract class NettyRemotingAbstract {
             Entry<Integer, ResponseFuture> next = it.next();
             ResponseFuture rep = next.getValue();
 
+            // response超时清理
             if ((rep.getBeginTimestamp() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {
                 rep.release();
                 it.remove();
@@ -349,6 +350,7 @@ public abstract class NettyRemotingAbstract {
             }
         }
 
+        // 超时response回调
         for (ResponseFuture rf : rfList) {
             try {
                 executeInvokeCallback(rf);

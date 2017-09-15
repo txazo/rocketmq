@@ -53,6 +53,9 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * DefaultMQProducer实现
+ */
 public class DefaultMQProducerImpl implements MQProducerInner {
     private final Logger log = ClientLogger.getLog();
     private final Random random = new Random();
@@ -107,6 +110,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     public void start() throws MQClientException {
+        // 启动
         this.start(true);
     }
 
@@ -115,9 +119,12 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             case CREATE_JUST:
                 this.serviceState = ServiceState.START_FAILED;
 
+                // 校验producerGroup
                 this.checkConfig();
 
+                // 非client内部producerGroup
                 if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
+                    // 实例名转换为pid
                     this.defaultMQProducer.changeInstanceNameToPID();
                 }
 

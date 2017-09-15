@@ -81,11 +81,13 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         this.nettyClientConfig = nettyClientConfig;
         this.channelEventListener = channelEventListener;
 
+        // 回调线程数
         int publicThreadNums = nettyClientConfig.getClientCallbackExecutorThreads();
         if (publicThreadNums <= 0) {
             publicThreadNums = 4;
         }
 
+        // 回调线程池
         this.publicExecutor = Executors.newFixedThreadPool(publicThreadNums, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
 
@@ -95,6 +97,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
             }
         });
 
+        // netty worker线程池
         this.eventLoopGroupWorker = new NioEventLoopGroup(1, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
 
@@ -113,6 +116,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
 
     @Override
     public void start() {
+        // handler执行线程池
         this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(//
             nettyClientConfig.getClientWorkerThreads(), //
             new ThreadFactory() {
@@ -135,8 +139,11 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                 @Override
                 public void initChannel(SocketChannel ch) throws Exception {
                     ch.pipeline().addLast(
+                        // handler执行线程池
                         defaultEventExecutorGroup,
+                        // Netty编码器
                         new NettyEncoder(),
+                        // Netty解码器
                         new NettyDecoder(),
                         new IdleStateHandler(0, 0, nettyClientConfig.getClientChannelMaxIdleTimeSeconds()),
                         new NettyConnectManageHandler(),
@@ -144,6 +151,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                 }
             });
 
+        // 定期扫描response表
         this.timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -156,6 +164,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         }, 1000 * 3, 1000);
 
         if (this.channelEventListener != null) {
+            // 启动事件线程
             this.nettyEventExecutor.start();
         }
     }

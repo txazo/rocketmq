@@ -83,6 +83,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         // 通道事件监听器
         this.channelEventListener = channelEventListener;
 
+        // 回调线程数
         int publicThreadNums = nettyServerConfig.getServerCallbackExecutorThreads();
         if (publicThreadNums <= 0) {
             publicThreadNums = 4;
