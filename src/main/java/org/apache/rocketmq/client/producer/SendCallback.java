@@ -16,8 +16,23 @@
  */
 package org.apache.rocketmq.client.producer;
 
+/**
+ * 消息发送回调
+ */
 public interface SendCallback {
+
+    /**
+     * 发送成功回调
+     *
+     * @param sendResult    发送结果
+     */
     public void onSuccess(final SendResult sendResult);
 
+    /**
+     * 发送失败回调
+     *
+     * @param e             异常
+     */
     public void onException(final Throwable e);
+
 }

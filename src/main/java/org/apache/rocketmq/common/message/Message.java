@@ -21,12 +21,28 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 消息
+ */
 public class Message implements Serializable {
     private static final long serialVersionUID = 8445773977080406428L;
 
+    // topic
     private String topic;
+
+    // 标记
     private int flag;
+
+    /**
+     * 键值对
+     *
+     * TAGS     tags
+     * KEYS     keys
+     * WAIT     waitStoreMsgOK
+     * DELAY    delayTimeLevel
+     */
     private Map<String, String> properties;
+    // 消息内容
     private byte[] body;
 
     public Message() {
@@ -36,6 +52,16 @@ public class Message implements Serializable {
         this(topic, "", "", 0, body, true);
     }
 
+    /**
+     * 消息
+     *
+     * @param topic             topic
+     * @param tags              标签
+     * @param keys              关键字
+     * @param flag              标记
+     * @param body              消息内容
+     * @param waitStoreMsgOK    是否等待消息存储ok
+     */
     public Message(String topic, String tags, String keys, int flag, byte[] body, boolean waitStoreMsgOK) {
         this.topic = topic;
         this.flag = flag;
@@ -141,6 +167,11 @@ public class Message implements Serializable {
         return 0;
     }
 
+    /**
+     * 设置消息延时级别
+     *
+     * @param level     延时级别
+     */
     public void setDelayTimeLevel(int level) {
         this.putProperty(MessageConst.PROPERTY_DELAY_TIME_LEVEL, String.valueOf(level));
     }

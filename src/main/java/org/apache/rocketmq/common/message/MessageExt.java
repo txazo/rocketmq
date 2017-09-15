@@ -23,23 +23,33 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
+/**
+ * 消息额外信息
+ */
 public class MessageExt extends Message {
     private static final long serialVersionUID = 5720810158625748049L;
 
+    // 队列id
     private int queueId;
-
+    // 存储大小
     private int storeSize;
-
+    // 队列偏移
     private long queueOffset;
+    // 标记
     private int sysFlag;
     private long bornTimestamp;
     private SocketAddress bornHost;
 
+    // 存储时间戳
     private long storeTimestamp;
     private SocketAddress storeHost;
+    // 消息id
     private String msgId;
+    // 提交日志偏移
     private long commitLogOffset;
+    // 校验码
     private int bodyCRC;
+    // 重复消费次数
     private int reconsumeTimes;
 
     private long preparedTransactionOffset;

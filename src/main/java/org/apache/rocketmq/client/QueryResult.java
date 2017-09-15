@@ -20,8 +20,13 @@ import org.apache.rocketmq.common.message.MessageExt;
 
 import java.util.List;
 
+/**
+ * 查询结果
+ */
 public class QueryResult {
+
     private final long indexLastUpdateTimestamp;
+    // 消息列表
     private final List<MessageExt> messageList;
 
     public QueryResult(long indexLastUpdateTimestamp, List<MessageExt> messageList) {
