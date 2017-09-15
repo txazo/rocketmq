@@ -26,25 +26,71 @@ import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 import java.util.concurrent.ExecutorService;
 
+/**
+ * 远程Server
+ */
 public interface RemotingServer extends RemotingService {
 
+    /**
+     * 注册请求处理器
+     *
+     * @param requestCode   请求类型
+     * @param processor     请求处理器
+     * @param executor      执行线程池
+     */
     void registerProcessor(final int requestCode, final NettyRequestProcessor processor,
                            final ExecutorService executor);
 
+    /**
+     * 注册默认请求处理器
+     *
+     * @param processor     请求处理器
+     * @param executor      执行线程池
+     */
     void registerDefaultProcessor(final NettyRequestProcessor processor, final ExecutorService executor);
 
+    /**
+     * 本地监听端口
+     */
     int localListenPort();
 
+    /**
+     * 获取请求类型对应的请求处理器和执行线程池
+     *
+     * @param requestCode   请求类型
+     */
     Pair<NettyRequestProcessor, ExecutorService> getProcessorPair(final int requestCode);
 
+    /**
+     * 同步调用
+     *
+     * @param channel           通道
+     * @param request           请求命令
+     * @param timeoutMillis     超时时间
+     */
     RemotingCommand invokeSync(final Channel channel, final RemotingCommand request,
                                final long timeoutMillis) throws InterruptedException, RemotingSendRequestException,
         RemotingTimeoutException;
 
+    /**
+     * 异步调用
+     *
+     * @param channel           通道
+     * @param request           请求命令
+     * @param timeoutMillis     超时时间
+     * @param invokeCallback    回调
+     */
     void invokeAsync(final Channel channel, final RemotingCommand request, final long timeoutMillis,
                      final InvokeCallback invokeCallback) throws InterruptedException,
         RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException;
 
+    /**
+     * 单向调用
+     *
+     * @param channel           通道
+     * @param request           请求命令
+     * @param timeoutMillis     超时时间
+     */
     void invokeOneway(final Channel channel, final RemotingCommand request, final long timeoutMillis)
         throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException,
         RemotingSendRequestException;

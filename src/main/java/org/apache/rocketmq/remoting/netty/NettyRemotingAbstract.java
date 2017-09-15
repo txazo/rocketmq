@@ -360,23 +360,32 @@ public abstract class NettyRemotingAbstract {
 
     public RemotingCommand invokeSyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis)
         throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException {
+        // 请求id
         final int opaque = request.getOpaque();
 
         try {
+            // ResponseFuture
             final ResponseFuture responseFuture = new ResponseFuture(opaque, timeoutMillis, null, null);
+            // ResponseFuture添加到response表
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
+            // 写请求并注册操作成功事件
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture f) throws Exception {
                     if (f.isSuccess()) {
+                        // 发送成功
                         responseFuture.setSendRequestOK(true);
+                        // 返回
                         return;
                     } else {
+                        // 发送失败
                         responseFuture.setSendRequestOK(false);
                     }
 
+                    // response表中清除当前请求
                     responseTable.remove(opaque);
+                    // 记录异常
                     responseFuture.setCause(f.cause());
                     responseFuture.putResponse(null);
                     PLOG.warn("send a request command to channel <" + addr + "> failed.");
@@ -395,6 +404,7 @@ public abstract class NettyRemotingAbstract {
 
             return responseCommand;
         } finally {
+            // response表中清除当前请求
             this.responseTable.remove(opaque);
         }
     }
