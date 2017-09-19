@@ -1,6 +1,7 @@
 package org.apache.rocketmq.test.common;
 
 import org.apache.rocketmq.client.MQAdmin;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MQConsumer;
 import org.apache.rocketmq.client.producer.MQProducer;
 
@@ -77,6 +78,12 @@ public class RocketMQProducerConsumer {
         public void init() throws Exception {
             admin = factory.newInstance(groupName);
             callMethod(admin, "setNamesrvAddr", new Class<?>[]{String.class}, namesrvAddr);
+
+            if (admin instanceof DefaultMQPushConsumer) {
+                ((DefaultMQPushConsumer) admin).setConsumeThreadMin(2);
+                ((DefaultMQPushConsumer) admin).setConsumeThreadMax(2);
+            }
+
             executor.init(admin, topicName);
         }
 
