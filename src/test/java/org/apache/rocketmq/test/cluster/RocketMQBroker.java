@@ -14,8 +14,8 @@ public class RocketMQBroker extends RocketMQCluster {
 
     @Override
     public void start() throws Exception {
-        System.setProperty("rocketmq.namesrv.addr", namesrvAddr);
         super.start();
+        System.setProperty("rocketmq.namesrv.addr", namesrvAddr);
         BrokerStartup.main(new String[]{"-c", getConfigFilePath()});
     }
 

@@ -2,13 +2,13 @@ package org.apache.rocketmq.test.cluster;
 
 public class RocketMQCluster {
 
-    private static final String ClusterHome = getClusterHome();
+    private static final String PROJECT_HOME = getProjectHome();
 
     private String userHome;
     protected String configFile;
 
     public RocketMQCluster(String userHome) {
-        this.userHome = ClusterHome + "/" + userHome;
+        this.userHome = PROJECT_HOME + "/" + userHome;
     }
 
     public void start() throws Exception {
@@ -20,11 +20,11 @@ public class RocketMQCluster {
         return userHome + "/" + configFile;
     }
 
-    private static String getClusterHome() {
+    private static String getProjectHome() {
         String path = RocketMQCluster.class.getResource("/").getPath();
         int index = path.indexOf("/target");
         if (index > -1) {
-            return path.substring(0, index) + "/cluster";
+            return path.substring(0, index);
         }
         return path;
     }
