@@ -5,6 +5,7 @@
 target/
 rocketmq/lib/
 devenv
+logs
 *.log*
 *.iml
 .idea/

@@ -18,7 +18,7 @@ public class SyncMessage {
 
     public static void main(String[] args) throws Exception {
         RocketMQProducerConsumer producerConsumer = new RocketMQProducerConsumer();
-        producerConsumer.namesrvAddr("127.0.0.1:9876")
+        producerConsumer.namesrvAddr("127.0.0.1:9876;127.0.0.1:9877")
                 .group("group-sync")
                 .topic("topic-sync")
                 .producer(DefaultMQProducer.class, new RocketMQProducerConsumer.RocketMQExecutor<DefaultMQProducer>() {
