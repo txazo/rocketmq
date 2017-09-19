@@ -1,5 +1,7 @@
 package org.apache.rocketmq.test.cluster;
 
+import org.apache.rocketmq.broker.BrokerStartup;
+
 public class RocketMQBroker extends RocketMQCluster {
 
     private String namesrvAddr;
@@ -14,6 +16,7 @@ public class RocketMQBroker extends RocketMQCluster {
     public void start() throws Exception {
         System.setProperty("rocketmq.namesrv.addr", namesrvAddr);
         super.start();
+        BrokerStartup.main(new String[]{"-c", getConfigFilePath()});
     }
 
 }
