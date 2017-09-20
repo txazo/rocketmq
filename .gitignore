@@ -15,3 +15,4 @@ cluster/*/store
 !LICENSE-BIN
 .DS_Store
 nohup.out
+tmp/
