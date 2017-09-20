@@ -33,10 +33,19 @@ import java.nio.ByteBuffer;
 public class NettyEncoder extends MessageToByteEncoder<RemotingCommand> {
     private static final Logger log = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
 
+    private String nodeName;
+
+    public NettyEncoder(String nodeName) {
+        super();
+        this.nodeName = nodeName;
+    }
+
     @Override
     public void encode(ChannelHandlerContext ctx, RemotingCommand remotingCommand, ByteBuf out)
         throws Exception {
         try {
+            remotingCommand.setNodeName(nodeName);
+
             // 编码header
             ByteBuffer header = remotingCommand.encodeHeader();
             out.writeBytes(header);

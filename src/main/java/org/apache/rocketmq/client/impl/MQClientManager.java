@@ -19,6 +19,7 @@ package org.apache.rocketmq.client.impl;
 import org.apache.rocketmq.client.ClientConfig;
 import org.apache.rocketmq.client.impl.factory.MQClientInstance;
 import org.apache.rocketmq.client.log.ClientLogger;
+import org.apache.rocketmq.debug.NodeNameHolder;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.slf4j.Logger;
 
@@ -47,7 +48,8 @@ public class MQClientManager {
 
     public MQClientInstance getAndCreateMQClientInstance(final ClientConfig clientConfig, RPCHook rpcHook) {
         // 生成clientId
-        String clientId = clientConfig.buildMQClientId();
+        // String clientId = clientConfig.buildMQClientId();
+        String clientId = NodeNameHolder.getNodeName();
         MQClientInstance instance = this.factoryTable.get(clientId);
         if (null == instance) {
             // 创建MQClientInstance

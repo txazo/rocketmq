@@ -22,6 +22,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.rocketmq.debug.CommandRequestCode;
+import org.apache.rocketmq.debug.NodeNameHolder;
 import org.apache.rocketmq.remoting.ChannelEventListener;
 import org.apache.rocketmq.remoting.InvokeCallback;
 import org.apache.rocketmq.remoting.RPCHook;
@@ -53,6 +55,10 @@ public abstract class NettyRemotingAbstract {
      * Remoting logger instance.
      */
     private static final Logger PLOG = LoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
+
+    private static final Logger CLOG = LoggerFactory.getLogger("RocketmqCommand");
+
+    protected final String nodeName = NodeNameHolder.getNodeName();
 
     /**
      * Semaphore to limit maximum number of on-going one-way requests, which protects system memory footprint.
@@ -134,20 +140,11 @@ public abstract class NettyRemotingAbstract {
             switch (cmd.getType()) {
                 case REQUEST_COMMAND:
                     // 处理请求命令
-                    if (this instanceof NettyRemotingServer) {
-                        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-                        int remotePort = ((InetSocketAddress) ctx.channel().remoteAddress()).getPort();
-                        System.out.printf(DateFormatUtils.format(System.currentTimeMillis(), "yyyy-MM-dd HH:mm:ss") + " 接收请求: code=%d localPort=%d remotePort=%d%n%n", cmd.getCode(), localPort, remotePort);
-                    }
+                    CLOG.info("{}", String.format("%-18s %-18s %s", nodeName, msg.getNodeName(), CommandRequestCode.command(cmd.getCode())));
                     processRequestCommand(ctx, cmd);
                     break;
                 case RESPONSE_COMMAND:
                     // 处理响应命令
-                    if (this instanceof NettyRemotingServer) {
-                        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-                        int remotePort = ((InetSocketAddress) ctx.channel().remoteAddress()).getPort();
-                        System.out.printf(DateFormatUtils.format(System.currentTimeMillis(), "yyyy-MM-dd HH:mm:ss") + " 处理响应: code=%d localPort=%d remotePort=%d%n%n", cmd.getCode(), localPort, remotePort);
-                    }
                     processResponseCommand(ctx, cmd);
                     break;
                 default:

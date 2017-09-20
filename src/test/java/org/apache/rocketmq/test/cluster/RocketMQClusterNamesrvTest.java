@@ -7,8 +7,8 @@ public class RocketMQClusterNamesrvTest {
 
     public static void main(String[] args) throws Exception {
         List<String> namesrvHomes = new ArrayList<>();
-        namesrvHomes.add("cluster/namesrv-1");
-        namesrvHomes.add("cluster/namesrv-2");
+        namesrvHomes.add("namesrv-1");
+        namesrvHomes.add("namesrv-2");
 
         for (String namesrvHome : namesrvHomes) {
             new RocketMQNamesrv(namesrvHome).start();

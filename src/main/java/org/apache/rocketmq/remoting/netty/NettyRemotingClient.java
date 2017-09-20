@@ -25,6 +25,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import org.apache.rocketmq.debug.NodeNameHolder;
 import org.apache.rocketmq.remoting.ChannelEventListener;
 import org.apache.rocketmq.remoting.InvokeCallback;
 import org.apache.rocketmq.remoting.RPCHook;
@@ -142,7 +143,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
                         // handler执行线程池
                         defaultEventExecutorGroup,
                         // Netty编码器
-                        new NettyEncoder(),
+                        new NettyEncoder(nodeName),
                         // Netty解码器
                         new NettyDecoder(),
                         new IdleStateHandler(0, 0, nettyClientConfig.getClientChannelMaxIdleTimeSeconds()),

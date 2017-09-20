@@ -4,23 +4,36 @@ import org.apache.rocketmq.client.MQAdmin;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.MQConsumer;
 import org.apache.rocketmq.client.producer.MQProducer;
+import org.apache.rocketmq.debug.NodeNameHolder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.concurrent.CyclicBarrier;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RocketMQProducerConsumer {
 
+    private int consumerSize = 1;
+    private String producerName = "producer";
+    private String consumerName = "consumer";
     private String namesrvAddr = "127.0.0.1:9876";
     private String groupName;
     private String topicName;
     private Thread producerThread;
     private Thread consumerThread;
-    private RocketMQProducer producer = new RocketMQProducer();
-    private RocketMQConsumer consumer = new RocketMQConsumer();
-    private CyclicBarrier barrier = new CyclicBarrier(2);
+    private RocketMQProducer producer;
+    private RocketMQFactory producerFactory;
+    private RocketMQFactory consumerFactory;
+    private RocketMQExecutor producerExecutor;
+    private RocketMQExecutor consumerExecutor;
+    private List<RocketMQConsumer> consumers;
 
     public RocketMQProducerConsumer() {
+    }
+
+    public RocketMQProducerConsumer consumerSize(int consumerSize) {
+        this.consumerSize = consumerSize;
+        return this;
     }
 
     public RocketMQProducerConsumer namesrvAddr(String namesrvAddr) {
@@ -39,49 +52,63 @@ public class RocketMQProducerConsumer {
     }
 
     public <T extends MQProducer> RocketMQProducerConsumer producer(Class<T> producerClass, RocketMQExecutor<T> executor) {
-        producer.setFactory(new RocketMQFactory(producerClass));
-        producer.setExecutor(executor);
+        producerExecutor = executor;
+        producerFactory = new RocketMQFactory(producerClass);
         return this;
     }
 
     public <T extends MQConsumer> RocketMQProducerConsumer consumer(Class<T> consumerClass, RocketMQExecutor<T> executor) {
-        consumer.setFactory(new RocketMQFactory(consumerClass));
-        consumer.setExecutor(executor);
+        consumerExecutor = executor;
+        consumerFactory = new RocketMQFactory(consumerClass);
         return this;
     }
 
     public RocketMQProducerConsumer start() throws Exception {
+        consumers = new ArrayList<>(consumerSize);
+        for (int i = 0; i < consumerSize; i++) {
+            RocketMQConsumer consumer = new RocketMQConsumer(consumerSize == 1 ? consumerName : (consumerName + "-" + i), consumerFactory, consumerExecutor);
+            consumers.add(consumer);
+            Thread consumerThread = new Thread(consumer);
+            consumerThread.start();
+            consumerThread.join();
+        }
+
+        producer = new RocketMQProducer(producerName, producerFactory, producerExecutor);
         producerThread = new Thread(producer);
-        consumerThread = new Thread(consumer);
-        producer.setOther(consumerThread);
-        consumer.setOther(producerThread);
         producerThread.start();
-        consumerThread.start();
         return this;
     }
 
     public void waitUtilClose() throws Exception {
         producerThread.join();
-        consumerThread.join();
+        for (RocketMQConsumer consumer : consumers) {
+            consumer.shutdown();
+        }
+        producer.shutdown();
     }
 
     private abstract class RocketMQAdmin<T extends MQAdmin> implements Runnable {
 
+        private String nodeName;
         protected T admin;
         protected RocketMQFactory<T> factory;
         protected RocketMQExecutor<T> executor;
-        protected Thread other;
 
-        public RocketMQAdmin() {
+        public RocketMQAdmin(String nodeName, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
+            this.nodeName = nodeName;
+            this.factory = factory;
+            this.executor = executor;
         }
 
         public void init() throws Exception {
+            NodeNameHolder.setNodeName(nodeName);
+
             admin = factory.newInstance(groupName);
             callMethod(admin, "setNamesrvAddr", new Class<?>[]{String.class}, namesrvAddr);
 
             if (admin instanceof DefaultMQPushConsumer) {
-                ((DefaultMQPushConsumer) admin).setConsumeThreadMin(2);
-                ((DefaultMQPushConsumer) admin).setConsumeThreadMax(2);
+                ((DefaultMQPushConsumer) admin).setConsumeThreadMin(8);
+                ((DefaultMQPushConsumer) admin).setConsumeThreadMax(8);
             }
 
             executor.init(admin, topicName);
@@ -92,7 +119,6 @@ public class RocketMQProducerConsumer {
         }
 
         public void execute() throws Exception {
-            barrier.await();
             executor.execute(admin, topicName);
         }
 
@@ -106,37 +132,27 @@ public class RocketMQProducerConsumer {
                 init();
                 start();
                 execute();
-                Thread.sleep(1000 * 60 * 60);
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    shutdown();
-                    other.interrupt();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
-        }
-
-        public void setFactory(RocketMQFactory<T> factory) {
-            this.factory = factory;
-        }
-
-        public void setExecutor(RocketMQExecutor<T> executor) {
-            this.executor = executor;
-        }
-
-        public void setOther(Thread other) {
-            this.other = other;
         }
 
     }
 
     private class RocketMQProducer<T extends MQProducer> extends RocketMQAdmin<T> {
+
+        public RocketMQProducer(String nodeName, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
+            super(nodeName, factory, executor);
+        }
+
     }
 
     private class RocketMQConsumer<T extends MQConsumer> extends RocketMQAdmin<T> {
+
+        public RocketMQConsumer(String nodeName, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
+            super(nodeName, factory, executor);
+        }
+
     }
 
     private static class RocketMQFactory<T extends MQAdmin> {

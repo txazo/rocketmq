@@ -9,10 +9,10 @@ public class RocketMQClusterBrokerTest {
         String namesrvAddr = "127.0.0.1:9876;127.0.0.1:9877";
 
         List<String> brokerHomes = new ArrayList<>();
-        brokerHomes.add("cluster/broker-1-master");
-        brokerHomes.add("cluster/broker-1-slave");
-        brokerHomes.add("cluster/broker-2-master");
-        brokerHomes.add("cluster/broker-2-slave");
+        brokerHomes.add("broker-1-master");
+        brokerHomes.add("broker-1-slave");
+        brokerHomes.add("broker-2-master");
+        brokerHomes.add("broker-2-slave");
 
         for (String brokerHome : brokerHomes) {
             new RocketMQBroker(brokerHome, namesrvAddr).start();

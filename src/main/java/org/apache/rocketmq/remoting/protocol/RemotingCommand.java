@@ -577,4 +577,16 @@ public class RemotingCommand {
     public void setSerializeTypeCurrentRPC(SerializeType serializeTypeCurrentRPC) {
         this.serializeTypeCurrentRPC = serializeTypeCurrentRPC;
     }
+
+    public String getNodeName() {
+        if (extFields == null) {
+            return null;
+        }
+        return extFields.get("_nodeName");
+    }
+
+    public void setNodeName(String nodeName) {
+        addExtField("_nodeName", nodeName);
+    }
+
 }

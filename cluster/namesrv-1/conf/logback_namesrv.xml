@@ -28,7 +28,7 @@
             <maxIndex>5</maxIndex>
         </rollingPolicy>
         <triggeringPolicy
-            class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
@@ -48,7 +48,7 @@
             <maxIndex>5</maxIndex>
         </rollingPolicy>
         <triggeringPolicy
-            class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
@@ -59,6 +59,18 @@
     <appender name="RocketmqNamesrvAppender" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="RocketmqNamesrvAppender_inner"/>
         <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <appender name="CommandAppender" class="ch.qos.logback.core.FileAppender">
+        <file>${user.home}/logs/rocketmqlogs/command.log</file>
+        <append>false</append>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -82,6 +94,11 @@
     <logger name="RocketmqRemoting" additivity="false">
         <level value="INFO"/>
         <appender-ref ref="RocketmqNamesrvAppender"/>
+    </logger>
+
+    <logger name="RocketmqCommand" additivity="false">
+        <level value="INFO"/>
+        <appender-ref ref="CommandAppender"/>
     </logger>
 
     <root>
