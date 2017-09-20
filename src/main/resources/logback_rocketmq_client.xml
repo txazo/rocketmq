@@ -37,22 +37,36 @@
         </encoder>
     </appender>
 
+    <appender name="CommandAppender" class="ch.qos.logback.core.FileAppender">
+        <file>${user.home}/logs/rocketmqlogs/command.log</file>
+        <append>false</append>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <charset class="java.nio.charset.Charset">UTF-8</charset>
+        </encoder>
+    </appender>
+
     <logger name="RocketmqCommon" additivity="false">
         <level value="${client.logLevel}"/>
         <appender-ref ref="RocketmqClientAppender"/>
     </logger>
-
 
     <logger name="RocketmqRemoting" additivity="false">
         <level value="${client.logLevel}"/>
         <appender-ref ref="RocketmqClientAppender"/>
     </logger>
 
-
     <logger name="RocketmqClient" additivity="false">
         <level value="${client.logLevel}"/>
         <appender-ref ref="RocketmqClientAppender"/>
     </logger>
 
+    <logger name="RocketmqCommand" additivity="false">
+        <level value="INFO"/>
+        <appender-ref ref="CommandAppender"/>
+    </logger>
 
 </configuration>
