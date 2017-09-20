@@ -5,8 +5,8 @@
 target/
 rocketmq/lib/
 devenv
-logs
-store
+cluster/*/logs
+cluster/*/store
 *.log*
 *.iml
 .idea/

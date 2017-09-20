@@ -16,10 +16,12 @@
  */
 package org.apache.rocketmq.remoting.netty;
 
+import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.rocketmq.remoting.ChannelEventListener;
 import org.apache.rocketmq.remoting.InvokeCallback;
 import org.apache.rocketmq.remoting.RPCHook;
@@ -35,6 +37,8 @@ import org.apache.rocketmq.remoting.protocol.RemotingSysResponseCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -130,10 +134,20 @@ public abstract class NettyRemotingAbstract {
             switch (cmd.getType()) {
                 case REQUEST_COMMAND:
                     // 处理请求命令
+                    if (this instanceof NettyRemotingServer) {
+                        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
+                        int remotePort = ((InetSocketAddress) ctx.channel().remoteAddress()).getPort();
+                        System.out.printf(DateFormatUtils.format(System.currentTimeMillis(), "yyyy-MM-dd HH:mm:ss") + " 接收请求: code=%d localPort=%d remotePort=%d%n%n", cmd.getCode(), localPort, remotePort);
+                    }
                     processRequestCommand(ctx, cmd);
                     break;
                 case RESPONSE_COMMAND:
                     // 处理响应命令
+                    if (this instanceof NettyRemotingServer) {
+                        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
+                        int remotePort = ((InetSocketAddress) ctx.channel().remoteAddress()).getPort();
+                        System.out.printf(DateFormatUtils.format(System.currentTimeMillis(), "yyyy-MM-dd HH:mm:ss") + " 处理响应: code=%d localPort=%d remotePort=%d%n%n", cmd.getCode(), localPort, remotePort);
+                    }
                     processResponseCommand(ctx, cmd);
                     break;
                 default:
