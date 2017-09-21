@@ -41,23 +41,42 @@ public interface MQProducer extends MQAdmin {
      */
     void shutdown();
 
+    /**
+     * 获取topic的queue列表
+     */
     List<MessageQueue> fetchPublishMessageQueues(final String topic) throws MQClientException;
 
     /**
-     * 同步发送
+     * 同步发送, 默认超时时间
      */
     SendResult send(final Message msg) throws MQClientException, RemotingException, MQBrokerException,
         InterruptedException;
 
+    /**
+     * 同步发送
+     *
+     * @param msg       消息
+     * @param timeout   超时时间
+     */
     SendResult send(final Message msg, final long timeout) throws MQClientException,
         RemotingException, MQBrokerException, InterruptedException;
 
     /**
      * 异步发送
+     *
+     * @param msg           消息
+     * @param sendCallback  回调
      */
     void send(final Message msg, final SendCallback sendCallback) throws MQClientException,
         RemotingException, InterruptedException;
 
+    /**
+     * 异步发送
+     *
+     * @param msg           消息
+     * @param sendCallback  回调
+     * @param timeout       超时时间
+     */
     void send(final Message msg, final SendCallback sendCallback, final long timeout)
         throws MQClientException, RemotingException, InterruptedException;
 

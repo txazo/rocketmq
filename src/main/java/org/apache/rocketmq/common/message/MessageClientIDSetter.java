@@ -100,6 +100,15 @@ public class MessageClientIDSetter {
         return result;
     }
 
+    /**
+     * 创建消息唯一id
+     *
+     * 4 ip
+     * 2 pid低16位
+     * 4 classLoader.hashCode()
+     * 4 当前时间与当月第一天的时间差
+     * 2 int计数器低16位
+     */
     public static String createUniqID() {
         StringBuilder sb = new StringBuilder(LEN * 2);
         sb.append(FIX_STRING);
