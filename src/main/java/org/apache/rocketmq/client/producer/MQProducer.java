@@ -47,7 +47,7 @@ public interface MQProducer extends MQAdmin {
     List<MessageQueue> fetchPublishMessageQueues(final String topic) throws MQClientException;
 
     /**
-     * 同步发送, 默认超时时间
+     * 同步发送
      */
     SendResult send(final Message msg) throws MQClientException, RemotingException, MQBrokerException,
         InterruptedException;
@@ -86,36 +86,108 @@ public interface MQProducer extends MQAdmin {
     void sendOneway(final Message msg) throws MQClientException, RemotingException,
         InterruptedException;
 
+    /**
+     * 同步发送
+     *
+     * @param msg   消息
+     * @param mq    queue
+     */
     SendResult send(final Message msg, final MessageQueue mq) throws MQClientException,
         RemotingException, MQBrokerException, InterruptedException;
 
+    /**
+     * 同步发送
+     *
+     * @param msg       消息
+     * @param mq        queue
+     * @param timeout   超时时间
+     */
     SendResult send(final Message msg, final MessageQueue mq, final long timeout)
         throws MQClientException, RemotingException, MQBrokerException, InterruptedException;
 
+    /**
+     * 异步发送
+     * @param msg           消息
+     * @param mq            queue
+     * @param sendCallback  回调
+     */
     void send(final Message msg, final MessageQueue mq, final SendCallback sendCallback)
         throws MQClientException, RemotingException, InterruptedException;
 
+    /**
+     * 异步发送
+     *
+     * @param msg               消息
+     * @param mq                queue
+     * @param sendCallback      回调
+     * @param timeout           超时时间
+     */
     void send(final Message msg, final MessageQueue mq, final SendCallback sendCallback, long timeout)
         throws MQClientException, RemotingException, InterruptedException;
 
+    /**
+     * 单向发送
+     *
+     * @param msg   消息
+     * @param mq    queue
+     */
     void sendOneway(final Message msg, final MessageQueue mq) throws MQClientException,
         RemotingException, InterruptedException;
 
+    /**
+     * 同步发送
+     *
+     * @param msg       消息
+     * @param selector  queue选择器
+     * @param arg       参数
+     */
     SendResult send(final Message msg, final MessageQueueSelector selector, final Object arg)
         throws MQClientException, RemotingException, MQBrokerException, InterruptedException;
 
+    /**
+     * 同步发送
+     *
+     * @param msg       消息
+     * @param selector  queue选择器
+     * @param arg       参数
+     * @param timeout   超时时间
+     */
     SendResult send(final Message msg, final MessageQueueSelector selector, final Object arg,
                     final long timeout) throws MQClientException, RemotingException, MQBrokerException,
         InterruptedException;
 
+    /**
+     * 异步发送
+     *
+     * @param msg           消息
+     * @param selector      queue选择器
+     * @param arg           参数
+     * @param sendCallback  回调
+     */
     void send(final Message msg, final MessageQueueSelector selector, final Object arg,
               final SendCallback sendCallback) throws MQClientException, RemotingException,
         InterruptedException;
 
+    /**
+     * 异步发送
+     *
+     * @param msg           消息
+     * @param selector      queue选择器
+     * @param arg           参数
+     * @param sendCallback  回调
+     * @param timeout       超时时间
+     */
     void send(final Message msg, final MessageQueueSelector selector, final Object arg,
               final SendCallback sendCallback, final long timeout) throws MQClientException, RemotingException,
         InterruptedException;
 
+    /**
+     * 单向发送
+     *
+     * @param msg       消息
+     * @param selector  queue选择器
+     * @param arg       参数
+     */
     void sendOneway(final Message msg, final MessageQueueSelector selector, final Object arg)
         throws MQClientException, RemotingException, InterruptedException;
 
@@ -131,12 +203,31 @@ public interface MQProducer extends MQAdmin {
     SendResult send(final Collection<Message> msgs) throws MQClientException, RemotingException, MQBrokerException,
         InterruptedException;
 
+    /**
+     * 发送批量消息
+     *
+     * @param msgs      消息列表
+     * @param timeout   超时时间
+     */
     SendResult send(final Collection<Message> msgs, final long timeout) throws MQClientException,
         RemotingException, MQBrokerException, InterruptedException;
 
+    /**
+     * 发送批量消息
+     *
+     * @param msgs      消息列表
+     * @param mq        queue
+     */
     SendResult send(final Collection<Message> msgs, final MessageQueue mq) throws MQClientException,
         RemotingException, MQBrokerException, InterruptedException;
 
+    /**
+     * 发送批量消息
+     *
+     * @param msgs      消息列表
+     * @param mq        queue
+     * @param timeout   超时时间
+     */
     SendResult send(final Collection<Message> msgs, final MessageQueue mq, final long timeout)
         throws MQClientException, RemotingException, MQBrokerException, InterruptedException;
 }
