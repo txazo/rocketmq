@@ -16,12 +16,10 @@
  */
 package org.apache.rocketmq.remoting.netty;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.rocketmq.debug.CommandRequestCode;
 import org.apache.rocketmq.debug.NodeNameHolder;
 import org.apache.rocketmq.remoting.ChannelEventListener;
@@ -39,8 +37,6 @@ import org.apache.rocketmq.remoting.protocol.RemotingSysResponseCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Iterator;

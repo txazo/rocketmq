@@ -425,17 +425,21 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             MessageQueue mq = null;
             Exception exception = null;
             SendResult sendResult = null;
+            // 同步模式下的重试次数
             int timesTotal = communicationMode == CommunicationMode.SYNC ? 1 + this.defaultMQProducer.getRetryTimesWhenSendFailed() : 1;
             int times = 0;
             String[] brokersSent = new String[timesTotal];
+            // 循环重试
             for (; times < timesTotal; times++) {
                 String lastBrokerName = null == mq ? null : mq.getBrokerName();
+                // 选取一个queue
                 MessageQueue tmpmq = this.selectOneMessageQueue(topicPublishInfo, lastBrokerName);
                 if (tmpmq != null) {
                     mq = tmpmq;
                     brokersSent[times] = mq.getBrokerName();
                     try {
                         beginTimestampPrev = System.currentTimeMillis();
+                        // 发送
                         sendResult = this.sendKernelImpl(msg, mq, communicationMode, sendCallback, topicPublishInfo, timeout);
                         endTimestamp = System.currentTimeMillis();
                         this.updateFaultItem(mq.getBrokerName(), endTimestamp - beginTimestampPrev, false);
@@ -445,8 +449,11 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                             case ONEWAY:
                                 return null;
                             case SYNC:
+                                // 发送失败
                                 if (sendResult.getSendStatus() != SendStatus.SEND_OK) {
+                                    // 是否允许失败后重试另一个broker
                                     if (this.defaultMQProducer.isRetryAnotherBrokerWhenNotStoreOK()) {
+                                        // 重试
                                         continue;
                                     }
                                 }
@@ -564,9 +571,12 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         final SendCallback sendCallback, //
         final TopicPublishInfo topicPublishInfo, //
         final long timeout) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
+        // 获取broker的master节点地址
         String brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());
         if (null == brokerAddr) {
+            // 无可用的master节点地址, 从namesrv更新
             tryToFindTopicPublishInfo(mq.getTopic());
+            // 重新获取broker的master节点地址
             brokerAddr = this.mQClientFactory.findBrokerAddressInPublish(mq.getBrokerName());
         }
 
@@ -578,14 +588,17 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             try {
                 //for MessageBatch,ID has been set in the generating process
                 if (!(msg instanceof MessageBatch)) {
+                    // 设置消息唯一id
                     MessageClientIDSetter.setUniqID(msg);
                 }
 
                 int sysFlag = 0;
+                // 消息压缩并设置压缩标记
                 if (this.tryToCompressMessage(msg)) {
                     sysFlag |= MessageSysFlag.COMPRESSED_FLAG;
                 }
 
+                // 事务消息标记
                 final String tranMsg = msg.getProperty(MessageConst.PROPERTY_TRANSACTION_PREPARED);
                 if (tranMsg != null && Boolean.parseBoolean(tranMsg)) {
                     sysFlag |= MessageSysFlag.TRANSACTION_PREPARED_TYPE;
@@ -623,6 +636,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                     this.executeSendMessageHookBefore(context);
                 }
 
+                // 发送消息请求header
                 SendMessageRequestHeader requestHeader = new SendMessageRequestHeader();
                 requestHeader.setProducerGroup(this.defaultMQProducer.getProducerGroup());
                 requestHeader.setTopic(msg.getTopic());
@@ -713,6 +727,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             }
         }
 
+        // broker的master节点不可用
         throw new MQClientException("The broker[" + mq.getBrokerName() + "] not exist", null);
     }
 
@@ -880,6 +895,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         if (topicPublishInfo != null && topicPublishInfo.ok()) {
             MessageQueue mq = null;
             try {
+                // 使用消息队列选择器选取queue
                 mq = selector.select(topicPublishInfo.getMessageQueueList(), msg, arg);
             } catch (Throwable e) {
                 throw new MQClientException("select message queue throwed exception.", e);
