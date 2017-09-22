@@ -58,6 +58,8 @@ public class MappedFile extends ReferenceResource {
     /**
      * Message will put to here first, and then reput to FileChannel if writeBuffer is not null.
      */
+
+    // 写缓冲区
     protected ByteBuffer writeBuffer = null;
     protected TransientStorePool transientStorePool = null;
     private String fileName;
@@ -201,20 +203,29 @@ public class MappedFile extends ReferenceResource {
         assert messageExt != null;
         assert cb != null;
 
+        // 当前写入位置
         int currentPos = this.wrotePosition.get();
 
+        // 文件满了
         if (currentPos < this.fileSize) {
+            // 写缓冲区
             ByteBuffer byteBuffer = writeBuffer != null ? writeBuffer.slice() : this.mappedByteBuffer.slice();
+            // 设置写入位置
             byteBuffer.position(currentPos);
             AppendMessageResult result = null;
+            // AppendMessageCallback回调
             if (messageExt instanceof MessageExtBrokerInner) {
+                // 单个消息
                 result = cb.doAppend(this.getFileFromOffset(), byteBuffer, this.fileSize - currentPos, (MessageExtBrokerInner) messageExt);
             } else if (messageExt instanceof MessageExtBatch) {
+                // 批量消息
                 result = cb.doAppend(this.getFileFromOffset(), byteBuffer, this.fileSize - currentPos, (MessageExtBatch)messageExt);
             } else {
                 return new AppendMessageResult(AppendMessageStatus.UNKNOWN_ERROR);
             }
+            // 更新当前写入位置
             this.wrotePosition.addAndGet(result.getWroteBytes());
+            // 更新最后存储时间戳
             this.storeTimestamp = result.getStoreTimestamp();
             return result;
         }
