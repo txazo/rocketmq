@@ -63,6 +63,7 @@ public class MappedFile extends ReferenceResource {
     protected ByteBuffer writeBuffer = null;
     protected TransientStorePool transientStorePool = null;
     private String fileName;
+    // 当前文件偏移
     private long fileFromOffset;
     private File file;
     private MappedByteBuffer mappedByteBuffer;
@@ -206,9 +207,9 @@ public class MappedFile extends ReferenceResource {
         // 当前写入位置
         int currentPos = this.wrotePosition.get();
 
-        // 文件满了
+        // 文件满了则返回
         if (currentPos < this.fileSize) {
-            // 写缓冲区
+            // 写缓冲区slice()
             ByteBuffer byteBuffer = writeBuffer != null ? writeBuffer.slice() : this.mappedByteBuffer.slice();
             // 设置写入位置
             byteBuffer.position(currentPos);

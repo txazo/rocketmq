@@ -36,6 +36,7 @@ public class BrokerConfig {
     private String brokerClusterName = "DefaultCluster";
     @ImportantField
     private long brokerId = MixAll.MASTER_ID;
+    // broker权限
     private int brokerPermission = PermName.PERM_READ | PermName.PERM_WRITE;
     private int defaultTopicQueueNums = 8;
     @ImportantField
@@ -99,6 +100,7 @@ public class BrokerConfig {
 
     private long waitTimeMillsInSendQueue = 200;
 
+    // 开始接收消息时间戳, 大于当前时间戳代表不接收消息
     private long startAcceptSendRequestTimeStamp = 0L;
 
     private boolean traceOn = true;

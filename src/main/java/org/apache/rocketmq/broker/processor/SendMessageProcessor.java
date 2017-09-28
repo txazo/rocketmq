@@ -65,7 +65,9 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
                     return null;
                 }
 
+                // 构建消息上下文, 用于执行SendMessageHook
                 mqtraceContext = buildMsgContext(ctx, requestHeader);
+                // 执行SendMessageHook.sendMessageBefore()
                 this.executeSendMessageHookBefore(ctx, request, mqtraceContext);
 
                 RemotingCommand response;
@@ -77,6 +79,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
                     response = this.sendMessage(ctx, request, mqtraceContext, requestHeader);
                 }
 
+                // 执行SendMessageHook.sendMessageAfter()
                 this.executeSendMessageHookAfter(response, mqtraceContext);
                 return response;
         }
@@ -292,16 +295,20 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
 
         // 创建response
         final RemotingCommand response = RemotingCommand.createResponseCommand(SendMessageResponseHeader.class);
+        // ResponseHeader
         final SendMessageResponseHeader responseHeader = (SendMessageResponseHeader) response.readCustomHeader();
 
-        // 设置response的请求id
+        // 设置response的请求id = request的请求id
         response.setOpaque(request.getOpaque());
 
+        // broker的分区id
         response.addExtField(MessageConst.PROPERTY_MSG_REGION, this.brokerController.getBrokerConfig().getRegionId());
+        // 是否开启追溯
         response.addExtField(MessageConst.PROPERTY_TRACE_SWITCH, String.valueOf(this.brokerController.getBrokerConfig().isTraceOn()));
 
         log.debug("receive SendMessage request command, {}", request);
 
+        // 检查broker是否接收消息
         final long startTimstamp = this.brokerController.getBrokerConfig().getStartAcceptSendRequestTimeStamp();
         if (this.brokerController.getMessageStore().now() < startTimstamp) {
             response.setCode(ResponseCode.SYSTEM_ERROR);
@@ -316,6 +323,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
             return response;
         }
 
+        // 消息body
         final byte[] body = request.getBody();
 
         // 队列id
@@ -328,6 +336,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
             queueIdInt = Math.abs(this.random.nextInt() % 99999999) % topicConfig.getWriteQueueNums();
         }
 
+        // 创建broker内部存储消息
         MessageExtBrokerInner msgInner = new MessageExtBrokerInner();
         msgInner.setTopic(requestHeader.getTopic());
         msgInner.setQueueId(queueIdInt);
@@ -359,6 +368,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
         // MessageStore存储消息
         PutMessageResult putMessageResult = this.brokerController.getMessageStore().putMessage(msgInner);
 
+        // 处理消息存储结果, 返回response
         return handlePutMessageResult(putMessageResult, response, request, msgInner, responseHeader, sendMessageContext, ctx, queueIdInt);
 
     }
