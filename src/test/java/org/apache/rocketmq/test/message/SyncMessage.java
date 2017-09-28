@@ -29,7 +29,7 @@ public class SyncMessage {
                             Message message = new Message(topicName, ("message-" + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
                             producer.send(message);
                             System.out.printf("生产同步消息: message=%s%n", new String(message.getBody()));
-                            Thread.sleep(1000);
+                            Thread.sleep(10);
                         }
                     }
 
