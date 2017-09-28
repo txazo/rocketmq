@@ -626,12 +626,16 @@ public class CommitLog {
                     return new PutMessageResult(PutMessageStatus.UNKNOWN_ERROR, result);
             }
 
+            // 计算占用锁的时间
             eclipseTimeInLock = this.defaultMessageStore.getSystemClock().now() - beginLockTimestamp;
+            // 重置beginTimeInLock
             beginTimeInLock = 0;
         } finally {
+            // 解锁
             putMessageLock.unlock();
         }
 
+        // 占用锁的时间大于500毫秒, 打印日志
         if (eclipseTimeInLock > 500) {
             log.warn("[NOTIFYME]putMessage in lock cost time(ms)={}, bodyLength={} AppendMessageResult={}", eclipseTimeInLock, msg.getBody().length, result);
         }
@@ -642,10 +646,13 @@ public class CommitLog {
 
         PutMessageResult putMessageResult = new PutMessageResult(PutMessageStatus.PUT_OK, result);
 
-        // Statistics
+        // 统计
+        // topic发送消息的次数加1
         storeStatsService.getSinglePutMessageTopicTimesTotal(msg.getTopic()).incrementAndGet();
+        // topic发送消息的大小
         storeStatsService.getSinglePutMessageTopicSizeTotal(topic).addAndGet(result.getWroteBytes());
 
+        // 处理磁盘flush
         handleDiskFlush(result, putMessageResult, msg);
         handleHA(result, putMessageResult, msg);
 
@@ -653,9 +660,10 @@ public class CommitLog {
     }
 
     public void handleDiskFlush(AppendMessageResult result, PutMessageResult putMessageResult, MessageExt messageExt) {
-        // Synchronization flush
+        // 同步刷新
         if (FlushDiskType.SYNC_FLUSH == this.defaultMessageStore.getMessageStoreConfig().getFlushDiskType()) {
             final GroupCommitService service = (GroupCommitService) this.flushCommitLogService;
+            // 等待消息存储ok
             if (messageExt.isWaitStoreMsgOK()) {
                 GroupCommitRequest request = new GroupCommitRequest(result.getWroteOffset() + result.getWroteBytes());
                 service.putRequest(request);
@@ -666,11 +674,13 @@ public class CommitLog {
                     putMessageResult.setPutMessageStatus(PutMessageStatus.FLUSH_DISK_TIMEOUT);
                 }
             } else {
+                // 不等待消息存储ok, 唤醒FlushCommitLogService
                 service.wakeup();
             }
         }
-        // Asynchronous flush
+        // 异步刷新
         else {
+            // 唤醒
             if (!this.defaultMessageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
                 flushCommitLogService.wakeup();
             } else {
@@ -1207,7 +1217,7 @@ public class CommitLog {
             // STORETIMESTAMP + STOREHOSTADDRESS + OFFSET <br>
 
             // PHY OFFSET
-            // 文件写入物理位置
+            // 文件写入offset
             long wroteOffset = fileFromOffset + byteBuffer.position();
 
             this.resetByteBuffer(hostHolder, 8);
@@ -1332,7 +1342,7 @@ public class CommitLog {
 
             final long beginTimeMills = CommitLog.this.defaultMessageStore.now();
 
-            // 消息写到队列缓冲区
+            // 消息写到缓冲区
             byteBuffer.put(this.msgStoreItemMemory.array(), 0, msgLen);
 
             // 返回append消息结果
@@ -1345,7 +1355,7 @@ public class CommitLog {
                     break;
                 case MessageSysFlag.TRANSACTION_NOT_TYPE:
                 case MessageSysFlag.TRANSACTION_COMMIT_TYPE:
-                    // 普通消息或commit事务消息, 更新消费队列的offset
+                    // 普通消息或commit事务消息, 消费队列的offset加1
                     CommitLog.this.topicQueueTable.put(key, ++queueOffset);
                     break;
                 default:

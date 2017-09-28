@@ -222,7 +222,7 @@ public abstract class AbstractSendMessageProcessor implements NettyRequestProces
         // 队列id
         int queueIdInt = requestHeader.getQueueId();
         int idValid = Math.max(topicConfig.getWriteQueueNums(), topicConfig.getReadQueueNums());
-        // 队列id检查
+        // 检查队列id是否有效
         if (queueIdInt >= idValid) {
             String errorInfo = String.format("request queueId[%d] is illegal, %s Producer: %s",
                 queueIdInt,
