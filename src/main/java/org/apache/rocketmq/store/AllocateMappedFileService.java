@@ -46,7 +46,9 @@ public class AllocateMappedFileService extends ServiceThread {
     }
 
     public MappedFile putRequestAndReturnMappedFile(String nextFilePath, String nextNextFilePath, int fileSize) {
+        // 可提交的请求数
         int canSubmitRequests = 2;
+
         if (this.messageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
             if (this.messageStore.getMessageStoreConfig().isFastFailIfNoBufferInStorePool()
                 && BrokerRole.SLAVE != this.messageStore.getMessageStoreConfig().getBrokerRole()) { //if broker is slave, don't fast fail even no buffer in pool
@@ -54,6 +56,7 @@ public class AllocateMappedFileService extends ServiceThread {
             }
         }
 
+        // 分配请求
         AllocateRequest nextReq = new AllocateRequest(nextFilePath, fileSize);
         boolean nextPutOK = this.requestTable.putIfAbsent(nextFilePath, nextReq) == null;
 
@@ -94,11 +97,13 @@ public class AllocateMappedFileService extends ServiceThread {
         AllocateRequest result = this.requestTable.get(nextFilePath);
         try {
             if (result != null) {
+                // 等待MappedFile创建成功
                 boolean waitOK = result.getCountDownLatch().await(waitTimeOut, TimeUnit.MILLISECONDS);
                 if (!waitOK) {
                     log.warn("create mmap timeout " + result.getFilePath() + " " + result.getFileSize());
                     return null;
                 } else {
+                    // 创建成功, 返回MappedFile
                     this.requestTable.remove(nextFilePath);
                     return result.getMappedFile();
                 }
@@ -151,6 +156,7 @@ public class AllocateMappedFileService extends ServiceThread {
         boolean isSuccess = false;
         AllocateRequest req = null;
         try {
+            // 从队列中获取分配请求
             req = this.requestQueue.take();
             AllocateRequest expectedRequest = this.requestTable.get(req.getFilePath());
             if (null == expectedRequest) {
@@ -164,6 +170,7 @@ public class AllocateMappedFileService extends ServiceThread {
                 return true;
             }
 
+            // MappedFile未创建
             if (req.getMappedFile() == null) {
                 long beginTime = System.currentTimeMillis();
 

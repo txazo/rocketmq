@@ -57,6 +57,7 @@ public class CommitLog {
     private HashMap<String/* topic-queueid */, Long/* offset */> topicQueueTable = new HashMap<String, Long>(1024);
     private volatile long confirmOffset = -1L;
 
+    // 为0代表未加锁, 大于0代表加锁时的时间戳
     private volatile long beginTimeInLock = 0;
     private final PutMessageLock putMessageLock;
     public CommitLog(final DefaultMessageStore defaultMessageStore) {
@@ -563,28 +564,33 @@ public class CommitLog {
                 MessageAccessor.putProperty(msg, MessageConst.PROPERTY_REAL_QUEUE_ID, String.valueOf(msg.getQueueId()));
                 msg.setPropertiesString(MessageDecoder.messageProperties2String(msg.getProperties()));
 
-                // 修改延时消息的topic和队列id
+                // 修正延时消息的topic和队列id
                 msg.setTopic(topic);
                 msg.setQueueId(queueId);
             }
         }
 
+        // 占用锁的时间
         long eclipseTimeInLock = 0;
         MappedFile unlockMappedFile = null;
+        // CommitLog映射文件
         MappedFile mappedFile = this.mappedFileQueue.getLastMappedFile();
 
-        // 加锁
+        // 写消息加锁
         putMessageLock.lock();
         try {
             long beginLockTimestamp = this.defaultMessageStore.getSystemClock().now();
             this.beginTimeInLock = beginLockTimestamp;
 
-            // 存储时间戳, 为了保证全局有序
+            // 加锁后重新设置存储时间为当前时间戳, 以保证全局有序
             msg.setStoreTimestamp(beginLockTimestamp);
 
+            // MappedFile为空或满了
             if (null == mappedFile || mappedFile.isFull()) {
+                // 创建新的MappedFile
                 mappedFile = this.mappedFileQueue.getLastMappedFile(0);
             }
+            // MappedFile创建失败, 则返回
             if (null == mappedFile) {
                 log.error("create maped file1 error, topic: " + msg.getTopic() + " clientAddr: " + msg.getBornHostString());
                 beginTimeInLock = 0;

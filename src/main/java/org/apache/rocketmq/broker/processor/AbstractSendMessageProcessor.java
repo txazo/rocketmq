@@ -169,7 +169,7 @@ public abstract class AbstractSendMessageProcessor implements NettyRequestProces
                 + "] sending message is forbidden");
             return response;
         }
-        // topic和系统关键字冲突
+        // 检查topic和系统关键字是否冲突
         if (!this.brokerController.getTopicConfigManager().isTopicCanSendMessage(requestHeader.getTopic())) {
             String errorMsg = "the topic[" + requestHeader.getTopic() + "] is conflict with system reserved words.";
             log.warn(errorMsg);
