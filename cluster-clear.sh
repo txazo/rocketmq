@@ -12,4 +12,5 @@ clearUserHome "cluster/broker-2-slave"
 clearUserHome "cluster/namesrv-1"
 clearUserHome "cluster/namesrv-2"
 
-rm -rf ~/logs
+rm -rf ~/logs/
+rm -rf ./tmp/

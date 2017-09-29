@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MultiRocketMQProducerConsumer {
 
     private String namesrvAddr = "127.0.0.1:9876";
+    private String topicName;
     private RocketMQFactory producerFactory;
     private RocketMQFactory consumerFactory;
     private RocketMQExecutor producerExecutor;
@@ -24,8 +26,14 @@ public class MultiRocketMQProducerConsumer {
     private List<RocketMQProducer> producers = new ArrayList<>();
     private Map<String, Integer> producerGroup = new HashMap<>();
     private Map<String, Integer> consumerGroup = new HashMap<>();
+    private ReentrantLock initLock = new ReentrantLock();
 
     public MultiRocketMQProducerConsumer() {
+    }
+
+    public MultiRocketMQProducerConsumer topic(String topicName) {
+        this.topicName = topicName;
+        return this;
     }
 
     public MultiRocketMQProducerConsumer producerGroup(String topicName, int producerSize) {
@@ -63,7 +71,7 @@ public class MultiRocketMQProducerConsumer {
         if (consumerGroup.size() > 0 && consumerFactory != null && consumerExecutor != null) {
             for (Map.Entry<String, Integer> entry : consumerGroup.entrySet()) {
                 for (int i = 0; i < entry.getValue(); i++) {
-                    RocketMQConsumer consumer = new RocketMQConsumer(entry.getKey() + "-" + i, entry.getKey(), consumerFactory, consumerExecutor);
+                    RocketMQConsumer consumer = new RocketMQConsumer(entry.getKey(), entry.getKey() + "-" + i, i, consumerFactory, consumerExecutor);
                     consumers.add(consumer);
                     new Thread(consumer).start();
                 }
@@ -71,9 +79,9 @@ public class MultiRocketMQProducerConsumer {
         }
 
         if (producerGroup.size() > 0 && producerFactory != null && producerExecutor != null) {
-            for (Map.Entry<String, Integer> entry : consumerGroup.entrySet()) {
+            for (Map.Entry<String, Integer> entry : producerGroup.entrySet()) {
                 for (int i = 0; i < entry.getValue(); i++) {
-                    RocketMQProducer producer = new RocketMQProducer(entry.getKey() + "-" + i, entry.getKey(), producerFactory, producerExecutor);
+                    RocketMQProducer producer = new RocketMQProducer(entry.getKey(), entry.getKey() + "-" + i, i, producerFactory, producerExecutor);
                     producers.add(producer);
                     new Thread(producer).start();
                 }
@@ -89,15 +97,17 @@ public class MultiRocketMQProducerConsumer {
 
     private abstract class RocketMQAdmin<T extends MQAdmin> implements Runnable {
 
-        private String nodeName;
         private String group;
+        private String nodeName;
+        private int index;
         protected T admin;
         protected RocketMQFactory<T> factory;
         protected RocketMQExecutor<T> executor;
 
-        public RocketMQAdmin(String nodeName, String group, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
-            this.nodeName = nodeName;
+        public RocketMQAdmin(String group, String nodeName, int index, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
             this.group = group;
+            this.nodeName = nodeName;
+            this.index = index;
             this.factory = factory;
             this.executor = executor;
         }
@@ -113,7 +123,7 @@ public class MultiRocketMQProducerConsumer {
                 ((DefaultMQPushConsumer) admin).setConsumeThreadMax(8);
             }
 
-            executor.init(admin, group);
+            executor.init(admin, index, nodeName, topicName);
         }
 
         public void start() throws Exception {
@@ -121,7 +131,7 @@ public class MultiRocketMQProducerConsumer {
         }
 
         public void execute() throws Exception {
-            executor.execute(admin, group);
+            executor.execute(admin, index, nodeName, topicName);
         }
 
         public void shutdown() throws Exception {
@@ -131,8 +141,13 @@ public class MultiRocketMQProducerConsumer {
         @Override
         public void run() {
             try {
-                init();
-                start();
+                initLock.lock();
+                try {
+                    init();
+                    start();
+                } finally {
+                    initLock.unlock();
+                }
                 execute();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -143,16 +158,16 @@ public class MultiRocketMQProducerConsumer {
 
     private class RocketMQProducer<T extends MQProducer> extends RocketMQAdmin<T> {
 
-        public RocketMQProducer(String nodeName, String group, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
-            super(nodeName, group, factory, executor);
+        public RocketMQProducer(String group, String nodeName, int index, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
+            super(group, nodeName, index, factory, executor);
         }
 
     }
 
     private class RocketMQConsumer<T extends MQConsumer> extends RocketMQAdmin<T> {
 
-        public RocketMQConsumer(String nodeName, String group, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
-            super(nodeName, group, factory, executor);
+        public RocketMQConsumer(String group, String nodeName, int index, RocketMQFactory<T> factory, RocketMQExecutor<T> executor) {
+            super(group, nodeName, index, factory, executor);
         }
 
     }
@@ -174,10 +189,10 @@ public class MultiRocketMQProducerConsumer {
 
     public static abstract class RocketMQExecutor<T extends MQAdmin> {
 
-        public void init(T t, String topicName) throws Exception {
+        public void init(T t, int index, String nodeName, String topicName) throws Exception {
         }
 
-        public void execute(T t, String topicName) throws Exception {
+        public void execute(T t, int index, String nodeName, String topicName) throws Exception {
         }
 
     }

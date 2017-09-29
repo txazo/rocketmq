@@ -15,6 +15,7 @@ public class CommandLogStat {
     public static void main(String[] args) throws Exception {
         stat("cluster/namesrv-2/logs/rocketmqlogs/command.log", "tmp/namesrv");
         stat("cluster/broker-2-slave/logs/rocketmqlogs/command.log", "tmp/broker");
+        stat("cluster/broker-2-slave/logs/rocketmqlogs/command.log", "tmp/client");
     }
 
     private static void stat(String input, String ouput) throws Exception {
@@ -63,7 +64,7 @@ public class CommandLogStat {
 
     private static String getType(String line) {
         String[] array = line.split("\\s+");
-        return array[7] + "@" + array[6] + "~" + array[5];
+        return array[8] + "|" + array[6] + "|" + array[7] + "|" + array[5];
     }
 
     private static String getProjectHome() {
