@@ -141,7 +141,7 @@ public abstract class NettyRemotingAbstract {
                     break;
                 case RESPONSE_COMMAND:
                     // 处理响应命令
-                    CLOG.info("{}", String.format("Response %-18s %-18s %s %s", nodeName, msg.getNodeName(), CommandRequestCode.responseCommand(cmd.getCode()), cmd.extFieldsToString()));
+                    // CLOG.info("{}", String.format("Response %-18s %-18s %s %s", nodeName, msg.getNodeName(), CommandRequestCode.responseCommand(cmd.getCode()), cmd.extFieldsToString()));
                     processResponseCommand(ctx, cmd);
                     break;
                 default:
