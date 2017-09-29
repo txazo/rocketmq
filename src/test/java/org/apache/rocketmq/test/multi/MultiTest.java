@@ -63,7 +63,7 @@ public class MultiTest {
 
                             @Override
                             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-                                System.err.printf("[%s]消费同步消息: message=%s%n", nodeName, new String(msgs.get(0).getBody()));
+                                System.err.printf("[%s]消费异步消息: message=%s%n", nodeName, new String(msgs.get(0).getBody()));
                                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                             }
 

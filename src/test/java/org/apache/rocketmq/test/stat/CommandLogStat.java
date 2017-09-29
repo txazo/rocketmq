@@ -15,12 +15,15 @@ public class CommandLogStat {
     public static void main(String[] args) throws Exception {
         stat("cluster/namesrv-2/logs/rocketmqlogs/command.log", "tmp/namesrv");
         stat("cluster/broker-2-slave/logs/rocketmqlogs/command.log", "tmp/broker");
-        stat("cluster/broker-2-slave/logs/rocketmqlogs/command.log", "tmp/client");
+        stat("/Users/txazo/logs/rocketmqlogs/command.log", "tmp/client");
     }
 
     private static void stat(String input, String ouput) throws Exception {
         init(ouput);
 
+        if (!input.startsWith("/")) {
+            input = getProjectHome() + "/" + input;
+        }
         Map<String, List<String>> types = readLog(input);
 
         for (Map.Entry<String, List<String>> entry : types.entrySet()) {
@@ -38,7 +41,7 @@ public class CommandLogStat {
         Map<String, List<String>> types = new HashMap<>();
         String type = null;
         String line = null;
-        try (BufferedReader br = new BufferedReader(new FileReader(getProjectHome() + "/" + input))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(input))) {
             while ((line = br.readLine()) != null) {
                 type = getType(line);
                 if (!types.containsKey(type)) {
