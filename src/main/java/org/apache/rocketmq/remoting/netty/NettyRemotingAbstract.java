@@ -136,7 +136,7 @@ public abstract class NettyRemotingAbstract {
             switch (cmd.getType()) {
                 case REQUEST_COMMAND:
                     // 处理请求命令
-                    CLOG.info("{}", String.format("%-18s %-18s %s", nodeName, msg.getNodeName(), CommandRequestCode.command(cmd.getCode())));
+                    CLOG.info("{}", String.format("%-18s %-18s %s %s", nodeName, msg.getNodeName(), CommandRequestCode.command(cmd.getCode()), cmd.extFieldsToString()));
                     processRequestCommand(ctx, cmd);
                     break;
                 case RESPONSE_COMMAND:

@@ -63,7 +63,7 @@ public class CommandLogStat {
 
     private static String getType(String line) {
         String[] array = line.split("\\s+");
-        return array[6] + ":" + array[5] + "@" + array[7];
+        return array[7] + "@" + array[6] + "~" + array[5];
     }
 
     private static String getProjectHome() {

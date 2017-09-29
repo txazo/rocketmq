@@ -16,6 +16,7 @@
  */
 package org.apache.rocketmq.remoting.protocol;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import org.apache.rocketmq.remoting.CommandCustomHeader;
 import org.apache.rocketmq.remoting.annotation.CFNotNull;
@@ -568,6 +569,10 @@ public class RemotingCommand {
         return "RemotingCommand [code=" + code + ", language=" + language + ", version=" + version + ", opaque=" + opaque + ", flag(B)="
             + Integer.toBinaryString(flag) + ", remark=" + remark + ", extFields=" + extFields + ", serializeTypeCurrentRPC="
             + serializeTypeCurrentRPC + "]";
+    }
+
+    public String extFieldsToString() {
+        return JSON.toJSONString(extFields);
     }
 
     public SerializeType getSerializeTypeCurrentRPC() {
