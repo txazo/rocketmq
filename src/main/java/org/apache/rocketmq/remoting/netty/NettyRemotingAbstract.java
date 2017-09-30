@@ -20,6 +20,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.rocketmq.common.protocol.RequestCode;
+import org.apache.rocketmq.common.protocol.header.SendMessageRequestHeaderV2;
 import org.apache.rocketmq.debug.CommandRequestCode;
 import org.apache.rocketmq.debug.NodeNameHolder;
 import org.apache.rocketmq.remoting.ChannelEventListener;

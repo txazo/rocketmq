@@ -35,6 +35,7 @@ public class MultiTest {
                     public void execute(DefaultMQProducer producer, int index, final String nodeName, String topicName) throws Exception {
                         for (int i = 0; ; i++) {
                             final Message message = new Message(topicName, ("message-" + index + "-" + +i).getBytes(RemotingHelper.DEFAULT_CHARSET));
+                            message.setDelayTimeLevel(3);
                             producer.send(message, new SendCallback() {
 
                                 @Override
